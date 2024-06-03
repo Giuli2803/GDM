@@ -33,5 +33,9 @@
 
 # CLion stuff IDK
 /.idea
-/Build
 /cmake-build-debug
+/cmake-build-release
+/cmake-build-default
+
+# Build
+/Build
