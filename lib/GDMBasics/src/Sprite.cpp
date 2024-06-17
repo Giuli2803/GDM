@@ -4,8 +4,8 @@
 #include "Sprite.h"
 
 namespace mate{
-    Sprite::Sprite(Element *element)
-    : Component(*element){
+    Sprite::Sprite(std::shared_ptr<Element> parent)
+    : _parent(std::move(parent)){
         _texture.loadFromFile("../Square.png");
         _sprite.sprite.setTexture(_texture, true);
         _target = mate::Game::getGame()->getWindowTarget();
@@ -22,10 +22,10 @@ namespace mate{
     // Also make a way to remove the sprite from the printing list.
     void Sprite::Loop() {
         if(_actualize){
-            _sprite.sprite.setScale(_element->getWorldScale());
-            _sprite.sprite.setRotation(_element->getWorldRotation());
-            _sprite.sprite.setPosition(_element->getWorldPosition());
-            _sprite.depth = (float) _element->getDepth() + (0.0000000001f * (float) _depth);
+            _sprite.sprite.setScale(_parent->getWorldScale());
+            _sprite.sprite.setRotation(_parent->getWorldRotation());
+            _sprite.sprite.setPosition(_parent->getWorldPosition());
+            _sprite.depth = (float) _parent->getDepth() + (0.0000000001f * (float) _depth);
         }
     }
 }//mate

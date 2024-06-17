@@ -3,35 +3,31 @@
 //
 
 #include "LocalCoords.h"
+#include <memory>
 
 namespace mate {
     [[maybe_unused]]
-    LocalCoords::LocalCoords(){
-        _parent = nullptr;
-        Transformable::setScale(1, 1);
-    }
-
-    LocalCoords::LocalCoords(LocalCoords* parent){
-        _parent = parent;
-        Transformable::setScale(1, 1);
+    LocalCoords::LocalCoords()
+    {
+        setScale(1.0f, 1.0f);
     }
 
     [[maybe_unused]]
-    LocalCoords::LocalCoords(sf::Vector2f position, LocalCoords *parent = nullptr)
-    : LocalCoords(parent) {
+    LocalCoords::LocalCoords(sf::Vector2f position, std::shared_ptr<LocalCoords> parent)
+    : _parent(std::move(parent)) {
         setPosition(position);
     }
 
     [[maybe_unused]]
-    LocalCoords::LocalCoords(sf::Vector2f position, float rotation, LocalCoords *parent = nullptr)
-    : LocalCoords(parent) {
+    LocalCoords::LocalCoords(sf::Vector2f position, float rotation, std::shared_ptr<LocalCoords> parent)
+    : _parent(std::move(parent)) {
         setPosition(position);
         setRotation(rotation);
     }
 
     [[maybe_unused]]
-    LocalCoords::LocalCoords(sf::Vector2f position, sf::Vector2f scale, float rotation, LocalCoords *parent = nullptr)
-    : LocalCoords(parent){
+    LocalCoords::LocalCoords(sf::Vector2f position, sf::Vector2f scale, float rotation, std::shared_ptr<LocalCoords> parent)
+    : _parent(std::move(parent)) {
         setPosition(position);
         setScale(scale);
         setRotation(rotation);

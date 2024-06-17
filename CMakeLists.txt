@@ -20,5 +20,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC lib/GDMBasics/include)
 target_link_libraries(${PROJECT_NAME} PUBLIC GDMBasics)
 
 # Unit tests
-enable_testing()
-add_subdirectory(tests)
+if (GDM_WITH_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif ()

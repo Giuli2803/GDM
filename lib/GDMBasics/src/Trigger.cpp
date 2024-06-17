@@ -115,6 +115,6 @@ namespace mate {
 
 
     void TriggerShooter::Loop() {
-        _manager->CheckTrigger(offset, shape, *_element);
+        _manager->CheckTrigger(offset, shape, *_parent);
     }
 }

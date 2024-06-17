@@ -13,8 +13,9 @@
 
 
 namespace mate{
-    class Sprite : public Component {
+    class Sprite {
     private:
+        std::shared_ptr<Element> _parent;
         sf::Texture _texture;
         ord_sprite _sprite;
         render_target *_target;
@@ -23,8 +24,8 @@ namespace mate{
         unsigned int _depth = 0;
     public:
         //Constructor
-        explicit Sprite(Element *element);
-        ~Sprite() override;
+        explicit Sprite(std::shared_ptr<Element> parent);
+        ~Sprite();
 
         //Simple methods
         void setTexture(const std::string &filename){
@@ -68,7 +69,9 @@ namespace mate{
         }
 
         //Other methods declarations
-        void Loop() override;
+        void Loop();
+        void RenderLoop() {}
+        void WindowResizeEvent() {}
     };
 }
 

@@ -6,45 +6,50 @@
 #define GDMATE_LOCALCOORDS_H
 
 #include <SFML/Graphics.hpp>
+#include <memory>
 
 namespace mate {
-class LocalCoords : public sf::Transformable {
+class LocalCoords : public sf::Transformable, public std::enable_shared_from_this<LocalCoords> {
     private:
-        LocalCoords *_parent;
+        std::shared_ptr<LocalCoords> _parent;
         int _depth = 0;
     public:
+        ///----------------------------- Constructors
         [[maybe_unused]]
         LocalCoords();
-        explicit LocalCoords(LocalCoords*);
-        [[maybe_unused]]
-        explicit LocalCoords(sf::Vector2f, LocalCoords*);
-        [[maybe_unused]]
-        explicit LocalCoords(sf::Vector2f, float, LocalCoords*);
-        [[maybe_unused]]
-        explicit LocalCoords(sf::Vector2f, sf::Vector2f, float, LocalCoords*);
 
+        [[maybe_unused]]
+        explicit LocalCoords(sf::Vector2f position, std::shared_ptr<LocalCoords> parent);
+        [[maybe_unused]]
+        explicit LocalCoords(sf::Vector2f, float, std::shared_ptr<LocalCoords> parent);
+        [[maybe_unused]]
+        explicit LocalCoords(sf::Vector2f, sf::Vector2f, float, std::shared_ptr<LocalCoords> parent);
+
+        ///---------------------------------- Getters
         sf::Vector2f getWorldPosition();
         sf::Vector2f getWorldScale();
         float getWorldRotation() const;
-
-        //Simple methods
-        void setDepth(int depth) { _depth = depth; }
+        std::shared_ptr<LocalCoords> getParent() const { return _parent; }
         int getDepth() const { return _depth; }
-        void setParent(LocalCoords* parent) { this->_parent = parent; }
-        LocalCoords* getParent() { return _parent; }
+
+        ///----------------------------------- Setters
+        void setDepth(int depth) { _depth = depth; }
+        void setParent(std::shared_ptr<LocalCoords> parent) { _parent = std::move(parent); }
     };
 
     class Bounds {
-        LocalCoords *_parent;
+        std::shared_ptr<LocalCoords> _parent;
     public:
         sf::Rect<float> rect_bounds;
 
-        explicit Bounds(LocalCoords *parent){
+        Bounds() = default;
+
+        explicit Bounds(std::shared_ptr<LocalCoords> parent){
             rect_bounds.left = 0;
             rect_bounds.top = 0;
             rect_bounds.width = 1;
             rect_bounds.height = 1;
-            _parent = parent;
+            _parent = std::move(parent);
         }
 
         sf::Vector2f getPositionBounds(){

@@ -8,11 +8,12 @@
 #include "GDMBasics.h"
 
 namespace mate {
-    class Animator : public Component {
+    class Animator {
     private:
         std::list<std::function<void()>> _actions;
+        std::shared_ptr<Element> _parent;
     public:
-        explicit Animator(Element &element) : Component(element){};
+        explicit Animator(std::shared_ptr<Element> parent) : _parent(std::move(parent)){};
 
         template <typename ClassType, typename... Args>
         void AddFrame(int frame, void (ClassType::*func)(Args...), ClassType& obj, Args... args){
@@ -24,8 +25,10 @@ namespace mate {
             //Todo: Implement
         }
 
-        //
-        void Loop() override;
+        //Todo: Implement
+        void Loop() {}
+        void RenderLoop() {}
+        void WindowResizeEvent() {}
     };
 } // mate
 

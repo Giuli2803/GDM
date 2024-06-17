@@ -23,13 +23,14 @@
 // * Add key combos (Instead of having A does X, I need [A] does X, so I could also do something like [A,B] does Y).
 
 namespace mate{
-    class InputActions : public Component{
+    class InputActions {
     private:
+        std::shared_ptr<Element> _parent;
         std::list<sf::Keyboard::Key> _key_inputs;
         std::list<std::function<void()>> _actions;
     public:
         //Constructors
-        explicit InputActions(Element* element) : Component(*element){};
+        explicit InputActions(std::shared_ptr<Element> parent) : _parent(std::move(parent)){};
 
         template <typename ClassType, typename... Args>
         void AddInput(sf::Keyboard::Key input, void (ClassType::*func)(Args...), ClassType& obj, Args... args) {
@@ -47,7 +48,9 @@ namespace mate{
             });
         }
 
-        void Loop() override;
+        void Loop();
+        void RenderLoop() {}
+        void WindowResizeEvent() {}
     };
 }//mate
 

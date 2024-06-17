@@ -5,18 +5,13 @@
 #include "GDMBasics.h"
 
 namespace mate {
-    Element::Element(LocalCoords* pParent)
-    : LocalCoords(pParent) {}
+    Element::Element(std::shared_ptr<LocalCoords>parent, sf::Vector2f position)
+    : LocalCoords(position, std::move(parent)) {}
 
-    Element::Element(mate::Room* pParent)
-    : LocalCoords(pParent) {}
-
-    Element::Element(mate::Element* pParent)
-    : LocalCoords(pParent) {}
-
-    Element& Element::AddChild() {
-        _elements.push_back(std::make_unique<Element>(this));
-        return *_elements.back();
+    std::shared_ptr<Element> Element::AddChild() {
+        auto child = std::make_shared<Element>(shared_from_this(), getPosition());
+        _elements.push_back(child);
+        return std::move(child);
     }
 
     void Element::Destroy(){
@@ -28,7 +23,7 @@ namespace mate {
 
     void Element::Loop() {
         if(!_destroy_flag){
-            for(auto &component: _components){
+            for(const auto &component: _components){
                 if(_destroy_flag)
                     break;
                 component->Loop();
@@ -40,7 +35,7 @@ namespace mate {
         }
 
         if(_destroy_flag){
-            std::cout << _components.size() << _elements.size() << std::endl;
+            //std::cout << _components.size() << _elements.size() << std::endl;
             _components.clear();
             _elements.clear();
         } else {
@@ -55,7 +50,7 @@ namespace mate {
             element->RenderLoop();
         }
 
-        for(auto &component : _components){
+        for(const auto &component : _components){
             component->RenderLoop();
         }
     }
@@ -65,7 +60,7 @@ namespace mate {
             element->ResizeEvent();
         }
 
-        for(auto &component : _components){
+        for(const auto &component : _components){
             component->WindowResizeEvent();
         }
     }

@@ -7,14 +7,14 @@
 namespace mate {
     [[maybe_unused]]
     void Room::AddElement(std::shared_ptr<Element> element) {
-        if(element->getParent())
-            element->setParent(this);
+        if(element->getParent() == nullptr)
+            element->setParent(shared_from_this());
         _elements.push_back(std::move(element));
     }
 
-    Element& Room::AddElement() {
-        _elements.push_back(std::make_shared<Element>(this));
-        return *_elements.back();
+    std::shared_ptr<Element> Room::AddElement() {
+        _elements.push_back(std::move(std::make_shared<Element>(shared_from_this(), getPosition())));
+        return _elements.back();
     }
 
     void Room::DataLoop() {

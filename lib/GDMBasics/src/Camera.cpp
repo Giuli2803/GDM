@@ -5,7 +5,9 @@
 #include "Camera.h"
 
 namespace mate{
-    Camera::Camera(Element *element) : Component(*element) {
+    Camera::Camera(std::shared_ptr<Element> parent)
+    : _parent(std::move(parent))
+    {
         _view.setCenter(sf::Vector2f (0, 0));
         _view.setSize(sf::Vector2f (480, 360));
         _target = mate::Game::getGame()->getWindow();
@@ -20,8 +22,8 @@ namespace mate{
 
     void Camera::Loop() {
         if(_target){
-            _view.setCenter(_element->getWorldPosition());
-            _view.setRotation(_element->getWorldRotation());
+            _view.setCenter(_parent->getWorldPosition());
+            _view.setRotation(_parent->getWorldRotation());
 
             //Todo: Update only once? Or redo just in case?
             _target->setView(_view);

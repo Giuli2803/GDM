@@ -9,6 +9,7 @@ namespace mate{
 
     std::shared_ptr<Game> Game::getGame() {
         //std::lock_guard<std::mutex> lock(mutex); //Uncomment when I start working with threads, maybe
+
         if(!_instance){
             _instance = std::shared_ptr<Game>(new Game());
             //Todo: set default values for screen size and game name

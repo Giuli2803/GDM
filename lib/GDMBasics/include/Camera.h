@@ -9,15 +9,16 @@
 #include "GDMBasics.h"
 
 namespace mate{
-    class Camera : public Component{
+    class Camera {
     public:
-        explicit Camera(Element *element);
-        ~Camera() override;
+        explicit Camera(std::shared_ptr<Element> parent);
+        ~Camera();
 
         enum ScaleType {
             LETTERBOX, RESCALE, REVEAL
         };
     private:
+        std::shared_ptr<Element> _parent;
         sf::View _view;
         std::shared_ptr<sf::RenderTarget> _target;
         float _aspect_ratio;
@@ -26,7 +27,7 @@ namespace mate{
         //Simple methods
         void setSize(float x, float y){
             _view.setSize(x, y);
-            _aspect_ratio = x/y;
+            _aspect_ratio = x / y;
         }
 
         sf::Vector2f getSize(){
@@ -37,7 +38,7 @@ namespace mate{
         float getRatio() {
             if(_scale_type == REVEAL){
                 auto size = _view.getSize();
-                _aspect_ratio = size.x/size.y;
+                _aspect_ratio = size.x / size.y;
             }
             return _aspect_ratio;
         }
@@ -48,12 +49,13 @@ namespace mate{
 
         [[maybe_unused]]
         void setTarget(std::shared_ptr<sf::RenderTarget> target){
-            this->_target = std::move(target);
+            _target = std::move(target);
         }
 
         //Other methods declarations
-        void Loop() override;
-        void WindowResizeEvent() override;
+        void Loop();
+        void RenderLoop() {}
+        void WindowResizeEvent();
     };
 }//mate
 

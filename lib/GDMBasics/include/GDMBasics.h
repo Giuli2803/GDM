@@ -74,7 +74,7 @@ namespace mate {
         //Element stuff
         [[maybe_unused]]
         void AddElement(std::shared_ptr<Element> element);
-        Element& AddElement();
+        std::shared_ptr<Element> AddElement();
 
         //Loops
         void DataLoop();
@@ -84,41 +84,94 @@ namespace mate {
         void ResizeEvent();
     };
 
-    class Element: public mate::LocalCoords {
+    template<class T>
+    concept valid_component = requires(T t) {
+        { t.Loop() } -> std::same_as<void>;
+        { t.RenderLoop() } -> std::same_as<void>;
+        { t.WindowResizeEvent() } -> std::same_as<void>;
+    };
+
+    class Component {
+    public:
+        template <valid_component T>
+        explicit Component(std::shared_ptr<T> x, std::shared_ptr<class Element> parent)
+        : self_(std::make_unique<model<T>>(std::move(x))), _parent(std::move(parent)) {}
+
+        //Virtual methods
+        void Loop() const {
+            self_->Loop_();
+        }
+        void RenderLoop() const {
+            self_->RenderLoop_();
+        }
+        void WindowResizeEvent() const {
+            self_->WindowResizeEvent_();
+        }
+
     private:
-        std::list<std::unique_ptr<Component>> _components;
-        std::list<std::unique_ptr<Element>> _elements;
+        struct concept_t {
+            virtual ~concept_t() = default;
+            virtual void Loop_() const = 0;
+            virtual void RenderLoop_() const = 0;
+            virtual void WindowResizeEvent_() const = 0;
+        };
+
+        template<typename T>
+        struct model final : concept_t {
+            explicit model(std::shared_ptr<T> x) : data_(std::move(x)){}
+
+            void Loop_() const override {
+                data_->Loop();
+            }
+            void RenderLoop_() const override {
+                data_->RenderLoop();
+            }
+            void WindowResizeEvent_() const override {
+                data_->WindowResizeEvent();
+            }
+            std::shared_ptr<T> data_;
+        };
+
+        std::shared_ptr<Element> _parent;
+        std::unique_ptr<concept_t> self_;
+    };
+
+    class Element: public mate::LocalCoords {//,  public std::enable_shared_from_this<Element> {
+    private:
+        std::vector<std::shared_ptr<Component>> _components;
+        std::list<std::shared_ptr<Element>> _elements;
         bool _destroy_flag = false;
     public:
-        ///Constructors
-        explicit Element(LocalCoords*);
-        explicit Element(Room*);
-        explicit Element(Element*);
+        ///--------------------------- Constructors
+        explicit Element(std::shared_ptr<LocalCoords> parent, sf::Vector2f position);
+        Element() = default;
 
-        ///Simple methods
         [[maybe_unused]]
-        unsigned long getElementsCount(){ return _elements.size(); }
+        unsigned long getElementsCount() const { return _elements.size(); }
 
         //Adds a new Component of the template type to the component list and returns it
-        template<typename T, typename = std::enable_if_t<std::is_base_of<Component, T>::value>>
-        T& addComponent() {
-            _components.push_back(std::make_unique<T>(this));
-            return *dynamic_cast<T*>(_components.back().get());
+        template<class T>
+        std::shared_ptr<T> addComponent() noexcept {
+            static_assert(valid_component<T>, "component must satisfy valid_component");
+            auto new_component = std::make_shared<T>(std::dynamic_pointer_cast<Element>(shared_from_this()));
+            _components.emplace_back(std::make_shared<Component>(new_component, std::dynamic_pointer_cast<Element>(shared_from_this())));
+            return new_component;
         }
 
-        template<class T, typename = std::enable_if_t<std::is_base_of<Component, T>::value>>
-        T* getComponent() const {
-            for(const auto& component : _components){
-                if(auto ptr = dynamic_cast<T*>(component.get()))
+        /*template<class T>
+        std::shared_ptr<T> getComponent() noexcept {
+            for(const auto &component : _components){
+                if(auto ptr = std::dynamic_pointer_cast<T>(component)) {
                     return ptr;
+                }
             }
             return nullptr;
-        }
+        }*/
 
         bool ShouldDestroy() const { return _destroy_flag; }
 
         //Other methods definitions
-        Element& AddChild();
+        std::shared_ptr<Element> AddChild();
         void Destroy();
         void Loop();
         void RenderLoop();
@@ -127,22 +180,9 @@ namespace mate {
         unsigned long getFullElementsCount();
     };
 
-    class Component {
-    protected:
-        Element *_element;
-    public:
-        //Constructor
-        explicit Component(Element &element){
-            _element = &element;
-        };
-        virtual ~Component() = default;
-
-        //Virtual methods
-        virtual void Loop() = 0;
-        virtual void RenderLoop() {}
-        virtual void WindowResizeEvent() {}
-    };
-
+    /**
+     * Main game singleton class.
+     */
     class Game{
     private:
         std::list<std::shared_ptr<Room>> _rooms;
@@ -151,7 +191,6 @@ namespace mate {
         TriggerManager _trigger_manager;
         static std::shared_ptr<Game> _instance;
 
-        //Todo: Pass window name as an argument.
         /**
          * Private constructor. Generates the window.
          */
@@ -167,7 +206,6 @@ namespace mate {
         ///---------------------------------------------Simple methods----------------------------
 
         ///-----------------Window related stuff
-
         [[nodiscard]]
         std::shared_ptr<sf::RenderWindow> getWindow() const { return _target.target; }
         render_target* getWindowTarget() { return &_target; }
@@ -177,7 +215,6 @@ namespace mate {
         }
 
         ///-----------------Rooms related stuff
-
         /**
          * Creates a shared pointer to store the new room on the room list
          * @param room Room to be added
@@ -216,8 +253,6 @@ namespace mate {
         static std::shared_ptr<Game> getGame(int winWidth, int winHeight, const std::string &gameName, std::list<std::shared_ptr<Room>>& roomsList);
 
         ///-------------------Others
-
-        [[maybe_unused]]
 
         //Todo: Switch rooms by using a unique ID given by the room itself.
         /**
