@@ -1,5 +1,7 @@
 #include "GDMBasics.h"
 
+// TODO: Funcking fix Input Actions fist, that's probably the biggest issue here.
+
 //Example of trigger implementation
 namespace mate{
     class ColorTrigger : public Trigger {
@@ -35,15 +37,17 @@ int main()
     camera->setScaleType(mate::Camera::ScaleType::LETTERBOX);
 
     auto sptElem0 = mainRoom->AddElement();
+    auto sptElemTest = mainRoom->AddElement();
     //*sprite component
+    auto spriteTest = sptElemTest->addComponent<mate::Sprite>();
     auto sprite1 = sptElem0->addComponent<mate::Sprite>(); // Error: El sprite este se sigue viendo despues de ser destruido el elemento. No ocurre con los hijos.
     sprite1->setColor(sf::Color::Red);
     //*input action component
     auto input1 = sptElem0->addComponent<mate::InputActions>();
-    input1->AddInput(sf::Keyboard::Right, &mate::Element::move, *sptElem0, 5.f, 0.f);
-    input1->AddInput(sf::Keyboard::Left, &mate::Element::move, *sptElem0, -5.f, 0.f);
-    input1->AddInput(sf::Keyboard::Up, &mate::Element::move, *sptElem0, 0.f, -5.f);
-    input1->AddInput(sf::Keyboard::Down, &mate::Element::move, *sptElem0, 0.f, 5.f);
+    input1->AddInput(sf::Keyboard::Right, &mate::Element::move, sptElem0, 5.f, 0.f);
+    input1->AddInput(sf::Keyboard::Left, &mate::Element::move, sptElem0, -5.f, 0.f);
+    input1->AddInput(sf::Keyboard::Up, &mate::Element::move, sptElem0, 0.f, -5.f);
+    input1->AddInput(sf::Keyboard::Down, &mate::Element::move, sptElem0, 0.f, 5.f);
     //TriggerShooter
     auto shooter = sptElem0->addComponent<mate::TriggerShooter>();
     shooter->shape = mate::RECTANGLE;
@@ -70,11 +74,12 @@ int main()
     sprite2->setTexture("../Circle.png");
     sprite2->setColor(sf::Color::Magenta);
     sprite2->setDepth(1);
-    input1->AddInput(sf::Keyboard::W, &mate::Element::Destroy, *sptElem0);
-    input1->AddInput(sf::Keyboard::A, &mate::Element::Destroy, *child0);
-    input1->AddInput(sf::Keyboard::D, &mate::Element::Destroy, *child1);
+    //input1->AddInput(sf::Keyboard::W, &mate::Element::Destroy, *sptElem0);
+    input1->AddInput(sf::Keyboard::W, &mate::Element::Destroy, sptElemTest);
+    input1->AddInput(sf::Keyboard::A, &mate::Element::Destroy, child0);
+    input1->AddInput(sf::Keyboard::D, &mate::Element::Destroy, child1);
     input1->AddInput(sf::Keyboard::S, &print);
-    input1->AddInput(sf::Keyboard::Space, &mate::Sprite::setColor, *sprite2, sf::Color::Magenta);
+    input1->AddInput(sf::Keyboard::Space, &mate::Sprite::setColor, sprite2, sf::Color::Magenta);
     //ColorTrigger
     auto color = sptElem1->addComponent<mate::ColorTrigger>();
     color->addSprite(*sprite2);

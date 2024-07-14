@@ -33,10 +33,10 @@ namespace mate{
         explicit InputActions(std::shared_ptr<Element> parent) : _parent(std::move(parent)){};
 
         template <typename ClassType, typename... Args>
-        void AddInput(sf::Keyboard::Key input, void (ClassType::*func)(Args...), ClassType& obj, Args... args) {
+        void AddInput(sf::Keyboard::Key input, void (ClassType::*func)(Args...), std::shared_ptr<ClassType> obj, Args... args) {
             _key_inputs.insert(_key_inputs.cend(), input);
-            _actions.insert(_actions.cend(), [&obj, func, args...]()->void {
-                return (obj.*func)(args...);
+            _actions.insert(_actions.cend(), [obj, func, args...]()->void {
+                return (obj.get()->*func)(args...);
             });
         }
 
