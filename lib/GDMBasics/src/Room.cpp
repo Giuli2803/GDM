@@ -18,6 +18,7 @@ namespace mate {
     }
 
     void Room::DataLoop() {
+
         for(auto &element : _elements)
         {
             element->Loop();

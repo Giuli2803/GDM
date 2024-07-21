@@ -6,14 +6,24 @@
 
 namespace mate {
     void InputActions::Loop() {
-        auto actIt = _actions.begin();
-
-        for(sf::Keyboard::Key key : _key_inputs){
-            if(sf::Keyboard::isKeyPressed(key)){
-                (*actIt)();
+        for (auto it = _actions.begin(); it != _actions.end();) {
+            if (sf::Keyboard::isKeyPressed(it->key)) {
+                it->action();
             }
-            //Todo: safety measures, sizes might not be correct (They should but make sure of that).
-            ++actIt;
+
+            bool shouldErase = false;
+            if (std::holds_alternative<std::weak_ptr<void>>(it->weakRef)) {
+                auto weakPtr = std::get<std::weak_ptr<void>>(it->weakRef);
+                if (weakPtr.expired()) {
+                    shouldErase = true;
+                }
+            }
+
+            if (shouldErase) {
+                it = _actions.erase(it);
+            } else {
+                ++it;
+            }
         }
     }
 } //mate

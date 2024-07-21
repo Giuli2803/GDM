@@ -9,6 +9,7 @@
 #include <list>
 #include <SFML/System.hpp>
 #include <functional>
+#include <variant>
 #include "GDMBasics.h"
 
 //Todo:
@@ -23,29 +24,44 @@
 // * Add key combos (Instead of having A does X, I need [A] does X, so I could also do something like [A,B] does Y).
 
 namespace mate{
+
+    struct ActionEntry {
+        sf::Keyboard::Key key;
+        std::function<void()> action;
+        std::variant<std::monostate, std::weak_ptr<void>> weakRef;
+    };
+
     class InputActions {
     private:
         std::shared_ptr<Element> _parent;
-        std::list<sf::Keyboard::Key> _key_inputs;
-        std::list<std::function<void()>> _actions;
+        std::list<ActionEntry> _actions;
     public:
         //Constructors
         explicit InputActions(std::shared_ptr<Element> parent) : _parent(std::move(parent)){};
 
         template <typename ClassType, typename... Args>
         void AddInput(sf::Keyboard::Key input, void (ClassType::*func)(Args...), std::shared_ptr<ClassType> obj, Args... args) {
-            _key_inputs.insert(_key_inputs.cend(), input);
-            _actions.insert(_actions.cend(), [obj, func, args...]()->void {
-                return (obj.get()->*func)(args...);
-            });
+            ActionEntry action;
+            action.key = input;
+            std::weak_ptr<ClassType> w_obj = obj;
+            action.action = [w_obj, func, args...]() -> void {
+                // Check if the object being referenced still exists
+                if (auto sharedObj = w_obj.lock()) {
+                    (sharedObj.get()->*func)(args...);
+                }
+            };
+            _actions.push_back(action);
         }
 
         template <typename... Args>
         void AddInput(sf::Keyboard::Key input, void (*func)(Args...), Args... args) {
-            _key_inputs.insert(_key_inputs.cend(), input);
-            _actions.insert(_actions.cend(), [func, args...]()->void {
+            ActionEntry action;
+            action.key = input;
+            action.action = [func, args...]()->void {
                 return (*func)(args...);
-            });
+            };
+            action.weakRef = std::monostate{};
+            _actions.push_back(action);
         }
 
         void Loop();

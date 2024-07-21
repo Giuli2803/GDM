@@ -11,7 +11,7 @@ namespace mate {
     std::shared_ptr<Element> Element::AddChild() {
         auto child = std::make_shared<Element>(shared_from_this(), getPosition());
         _elements.push_back(child);
-        return std::move(child);
+        return child;
     }
 
     void Element::Destroy(){
@@ -35,14 +35,13 @@ namespace mate {
         }
 
         if(_destroy_flag){
-            //std::cout << _components.size() << _elements.size() << std::endl;
             _components.clear();
             _elements.clear();
-        } else {
-            _elements.remove_if([](auto& element) {
-                return element->ShouldDestroy();
-            });
         }
+
+        _elements.remove_if([](auto& element) {
+            return element->ShouldDestroy();
+        });
     }
 
     void Element::RenderLoop(){

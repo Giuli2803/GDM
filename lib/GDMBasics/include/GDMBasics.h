@@ -37,7 +37,7 @@ namespace mate {
     struct render_target{
         //Todo: Use an mate::RenderTarget instead of a _target
         std::shared_ptr<sf::RenderWindow> target{};
-        std::list<ord_sprite*> printQueue;
+        std::list<std::shared_ptr<ord_sprite>> printQueue;
     };
 
     class TriggerManager {
@@ -158,16 +158,6 @@ namespace mate {
             return new_component;
         }
 
-        /*template<class T>
-        std::shared_ptr<T> getComponent() noexcept {
-            for(const auto &component : _components){
-                if(auto ptr = std::dynamic_pointer_cast<T>(component)) {
-                    return ptr;
-                }
-            }
-            return nullptr;
-        }*/
-
         bool ShouldDestroy() const { return _destroy_flag; }
 
         //Other methods definitions
@@ -264,8 +254,13 @@ namespace mate {
         /**
          * Main game loop
          */
+         [[noreturn]]
         void gameLoop(bool isTesting = false);
     };
+
+    using game_instance = std::shared_ptr<Game>;
+
+    game_instance Start();
 }
 
 #include "Sprite.h"

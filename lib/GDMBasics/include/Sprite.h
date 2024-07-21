@@ -17,7 +17,7 @@ namespace mate{
     private:
         std::shared_ptr<Element> _parent;
         sf::Texture _texture;
-        ord_sprite _sprite;
+        std::shared_ptr<ord_sprite> _sprite;
         render_target *_target;
 
         bool _actualize = true;
@@ -36,12 +36,12 @@ namespace mate{
 
         [[maybe_unused]]
         void setColor(sf::Color color){
-            _sprite.sprite.setColor(color);
+            _sprite->sprite.setColor(color);
         }
 
         [[maybe_unused]]
         void setColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha){
-            _sprite.sprite.setColor(sf::Color(red, green, blue, alpha));
+            _sprite->sprite.setColor(sf::Color(red, green, blue, alpha));
         }
 
         [[maybe_unused]]

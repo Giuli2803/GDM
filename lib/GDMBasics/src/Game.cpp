@@ -55,6 +55,7 @@ namespace mate{
         }
     }
 
+    [[noreturn]]
     void Game::gameLoop(bool isTesting) {
         _target.target->setFramerateLimit(60);
         do {
@@ -79,9 +80,10 @@ namespace mate{
             //Todo: Render Loop
             _target.target->clear();
             _active_room->RenderLoop();
-            _target.printQueue.sort([](ord_sprite* a, ord_sprite* b){ return a->depth < b->depth; });
+            _target.printQueue.sort([](const std::shared_ptr<ord_sprite>& a, const std::shared_ptr<ord_sprite>& b)
+            { return a->depth < b->depth; });
 
-            for(ord_sprite* sp : _target.printQueue){
+            for(const std::shared_ptr<ord_sprite>& sp : _target.printQueue){
                 _target.target->draw(sp->sprite);
             }
 
