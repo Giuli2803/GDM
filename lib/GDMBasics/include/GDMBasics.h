@@ -18,6 +18,7 @@ namespace mate {
     class Element;
     class Component;
     class Trigger;
+    class TriggerShooter;
 
     enum ShapeType{
         RECTANGLE,
@@ -52,7 +53,7 @@ namespace mate {
             triggers.remove(trig);
         }
 
-        void CheckTrigger(mate::Bounds, ShapeType, Element&);
+        void CheckTrigger(ShapeType, const TriggerShooter&);
         static bool RectangleToRectangleCheck(sf::Vector2f, sf::Vector2f, sf::Vector2f, sf::Vector2f);
         static bool CircleToCircleCheck(sf::Vector2f, float, sf::Vector2f, float);
         static bool CircleToRectangleCheck(sf::Vector2f, float, sf::Vector2f, sf::Vector2f);

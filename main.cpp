@@ -14,7 +14,7 @@ namespace mate{
             _sprite = std::make_shared<Sprite>(sprite);
         }
 
-        void TriggerIn(Element& shooter) override{
+        void TriggerIn() override{
             if(_sprite)
                 _sprite->setColor(sf::Color::Green);
         }
@@ -57,8 +57,7 @@ namespace mate{
         //TriggerShooter
         auto shooter = sptElem0->addComponent<mate::TriggerShooter>();
         shooter->shape = mate::RECTANGLE;
-        shooter->offset.rect_bounds.width = 64;
-        shooter->offset.rect_bounds.height = 64;
+        shooter->setDimentionOffset(64, 64);
 
         auto child0 = sptElem0->AddChild();
         child0->setDepth(-1);
@@ -73,13 +72,14 @@ namespace mate{
         child1->addComponent<mate::Sprite>();
 
         auto sptElem1 = mainRoom->AddElement();
-        sptElem1->setPosition(180, 0);
+        sptElem1->setPosition(20, 0);
         sptElem1->setScale(2, 2);
+        sptElem1->setDepth(-2);
         //Sprite component
         auto sprite2 = sptElem1->addComponent<mate::Sprite>();
         sprite2->setTexture("../Circle.png");
         sprite2->setColor(sf::Color::Magenta);
-        sprite2->setDepth(1);
+        sprite2->setDepth(-10);
         //input1->AddInput(sf::Keyboard::W, &mate::Element::Destroy, *sptElem0);
         input1->AddInput(sf::Keyboard::W, &mate::Element::Destroy, sptElemTest);
         input1->AddInput(sf::Keyboard::A, &mate::Element::Destroy, std::move(child0));
@@ -88,10 +88,9 @@ namespace mate{
         input1->AddInput(sf::Keyboard::Space, &mate::Sprite::setColor, sprite2, sf::Color::Magenta);
         //ColorTrigger
         auto color = sptElem1->addComponent<mate::ColorTrigger>();
-        color->addSprite(*spriteTest);
+        color->addSprite(*sprite2);
         color->shape = mate::CIRCLE;
-        color->offset.rect_bounds.width = 64;
-        color->offset.rect_bounds.height = 64;
+        color->setDimentionOffset(64, 64);
 
         return game;
     }

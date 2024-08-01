@@ -8,16 +8,14 @@ namespace mate {
 
     //Todo: Rotated rectangles
     //Todo: Add depth to triggers
-
-    // Todo: Separate method for better maintainability
-    void TriggerManager::CheckTrigger(mate::Bounds bounds, ShapeType shape, Element& shooter) {
-        sf::Vector2f position = bounds.getPositionBounds();
-        sf::Vector2f dimensions = bounds.getDimensionBounds();
+    void TriggerManager::CheckTrigger(ShapeType shape, const TriggerShooter& shooter) {
+        sf::Vector2f position = shooter.getPosition();
+        sf::Vector2f dimensions = shooter.getDimensions();
         float radius, trig_radius;
 
         for(Trigger* trigger : triggers) {
-            sf::Vector2 trig_position = trigger->offset.getPositionBounds();
-            sf::Vector2 trig_dimensions = trigger->offset.getDimensionBounds();
+            sf::Vector2 trig_position = trigger->getPosition();
+            sf::Vector2 trig_dimensions = trigger->getDimensions();
 
             switch (trigger->shape) {
                 case RECTANGLE:
@@ -25,7 +23,7 @@ namespace mate {
                         case RECTANGLE:
                             //Collision between two rectangles
                             if(RectangleToRectangleCheck(position, dimensions, trig_position, trig_dimensions))
-                                trigger->TriggerIn(shooter);
+                                trigger->TriggerIn();
                             break;
                         case CIRCLE:
                             //Shooter is a circle, trigger is a rectangle
@@ -36,7 +34,7 @@ namespace mate {
                             position.y += radius;
 
                             if(CircleToRectangleCheck(position, radius, trig_position, trig_dimensions))
-                                trigger->TriggerIn(shooter);
+                                trigger->TriggerIn();
                             break;
                     }
                     break;
@@ -49,7 +47,7 @@ namespace mate {
                     switch (shape) {
                         case RECTANGLE:
                             if(CircleToRectangleCheck(trig_position, trig_radius, position, dimensions))
-                                trigger->TriggerIn(shooter);
+                                trigger->TriggerIn();
                             break;
                         case CIRCLE:
                             //Collision between circles
@@ -58,7 +56,7 @@ namespace mate {
                             position.y += radius;
 
                             if(CircleToCircleCheck(position, radius, trig_position, trig_radius))
-                                trigger->TriggerIn(shooter);
+                                trigger->TriggerIn();
                             break;
                     }
                     break;
@@ -117,8 +115,7 @@ namespace mate {
 
     void TriggerShooter::Loop() {
         if (std::shared_ptr<Element> spt_parent = _parent.lock()) {
-            // Maybe just send the shared pointer?
-            _manager->CheckTrigger(offset, shape, *spt_parent);
+            _manager->CheckTrigger(shape, *this);
         }
     }
 }
