@@ -1,16 +1,17 @@
 #include "GDMBasics.h"
 
-// TODO: Funcking fix Input Actions fist, that's probably the biggest issue here.
-
 //Example of trigger implementation
 namespace mate{
     class ColorTrigger : public Trigger {
-        Sprite *_sprite = nullptr;
+        // Al destruirse el elemento va a seguir existiendo el sprite por esta referencia, debería ser un weak_ptr
+        // No es muy importante porque solo es un código de test, pero esta bueno saberlo.
+        // A futuro debería crear Factories de los componentes.
+        std::shared_ptr<Sprite> _sprite = nullptr;
     public:
         explicit ColorTrigger(std::shared_ptr<Element> parent) : Trigger(std::move(parent)) {}
 
         void addSprite(Sprite &sprite){
-            _sprite = &sprite;
+            _sprite = std::make_shared<Sprite>(sprite);
         }
 
         void TriggerIn(Element& shooter) override{
@@ -87,7 +88,7 @@ namespace mate{
         input1->AddInput(sf::Keyboard::Space, &mate::Sprite::setColor, sprite2, sf::Color::Magenta);
         //ColorTrigger
         auto color = sptElem1->addComponent<mate::ColorTrigger>();
-        color->addSprite(*sprite2);
+        color->addSprite(*spriteTest);
         color->shape = mate::CIRCLE;
         color->offset.rect_bounds.width = 64;
         color->offset.rect_bounds.height = 64;
