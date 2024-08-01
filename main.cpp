@@ -8,7 +8,7 @@ namespace mate{
         // A futuro debería crear Factories de los componentes.
         std::shared_ptr<Sprite> _sprite = nullptr;
     public:
-        explicit ColorTrigger(const std::weak_ptr<Element>& parent) : Trigger(parent) {}
+        explicit ColorTrigger(const std::weak_ptr<Element>& parent) : Trigger(parent, true) {}
 
         void addSprite(Sprite &sprite){
             _sprite = std::make_shared<Sprite>(sprite);
@@ -57,7 +57,7 @@ namespace mate{
         //TriggerShooter
         auto shooter = sptElem0->addComponent<mate::TriggerShooter>();
         shooter->shape = mate::RECTANGLE;
-        shooter->setDimentionOffset(64, 64);
+        shooter->setDimensionOffset(64, 64);
 
         auto child0 = sptElem0->AddChild();
         child0->setDepth(-1);
@@ -80,17 +80,17 @@ namespace mate{
         sprite2->setTexture("../Circle.png");
         sprite2->setColor(sf::Color::Magenta);
         sprite2->setDepth(-10);
-        //input1->AddInput(sf::Keyboard::W, &mate::Element::Destroy, *sptElem0);
-        input1->AddInput(sf::Keyboard::W, &mate::Element::Destroy, sptElemTest);
         input1->AddInput(sf::Keyboard::A, &mate::Element::Destroy, std::move(child0));
         input1->AddInput(sf::Keyboard::D, &mate::Element::Destroy, child1);
         input1->AddInput(sf::Keyboard::S, &print);
         input1->AddInput(sf::Keyboard::Space, &mate::Sprite::setColor, sprite2, sf::Color::Magenta);
         //ColorTrigger
-        auto color = sptElem1->addComponent<mate::ColorTrigger>();
+        auto color = std::make_unique<ColorTrigger>(sptElem1);
+        input1->AddInput(sf::Keyboard::W, &mate::Game::RemoveTrigger, game, color->getID());
         color->addSprite(*sprite2);
         color->shape = mate::CIRCLE;
-        color->setDimentionOffset(64, 64);
+        color->setDimensionOffset(64, 64);
+        game->AddTrigger(std::move(color));
 
         return game;
     }

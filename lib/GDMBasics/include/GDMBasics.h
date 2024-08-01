@@ -41,24 +41,6 @@ namespace mate {
         std::list<std::shared_ptr<ord_sprite>> printQueue;
     };
 
-    class TriggerManager {
-    private:
-        std::list<Trigger*> triggers;
-    public:
-        void AddTrigger(Trigger *const trig) {
-            triggers.push_back(trig);
-        }
-
-        void RemoveTrigger(Trigger *const trig){
-            triggers.remove(trig);
-        }
-
-        void CheckTrigger(ShapeType, const TriggerShooter&);
-        static bool RectangleToRectangleCheck(sf::Vector2f, sf::Vector2f, sf::Vector2f, sf::Vector2f);
-        static bool CircleToCircleCheck(sf::Vector2f, float, sf::Vector2f, float);
-        static bool CircleToRectangleCheck(sf::Vector2f, float, sf::Vector2f, sf::Vector2f);
-    };
-
     class Room: public mate::LocalCoords {
     private:
         std::list< std::shared_ptr<Element> > _elements;
@@ -138,6 +120,100 @@ namespace mate {
         unsigned long getFullElementsCount();
     };
 
+    class Trigger {
+    private:
+        mate::Bounds _offset = mate::Bounds();
+        const std::weak_ptr<Element> _follow;
+        const int id;
+        bool _must_follow = false;
+        bool should_remove = false;
+
+        static int generate_id(){
+            static int unique_id = 0;
+            return unique_id++;
+        }
+    public:
+        ShapeType shape = RECTANGLE;
+
+        Trigger() : id(generate_id()){
+            _offset = mate::Bounds();
+        }
+        explicit Trigger(const std::weak_ptr<Element>& follow, bool must_follow)
+                : _follow(follow), id(generate_id()), _must_follow(must_follow) {
+            _offset = mate::Bounds();
+        }
+
+        ~Trigger(){
+            std::cout << "success" << std::endl;
+        }
+
+        [[nodiscard]]int getID() const { return id; }
+
+        void CheckRemove() {
+            if (_must_follow && _follow.expired())
+                should_remove = true;
+        };
+
+        [[nodiscard]] bool ShouldRemove() const { return should_remove; }
+        void MarkForRemoval() { should_remove = true; }
+
+        [[nodiscard]] sf::Vector2f getPosition() const {
+            sf::Vector2f reference(0, 0);
+            if (std::shared_ptr<Element> spt_parent = _follow.lock()){
+                reference = spt_parent->getWorldPosition();
+            }
+            return _offset.getPositionBounds(reference);
+        }
+
+        [[nodiscard]] sf::Vector2f getDimensions() const {
+            sf::Vector2f reference(1, 1);
+            if (std::shared_ptr<Element> spt_parent = _follow.lock()){
+                reference = spt_parent->getWorldScale();
+            }
+            return _offset.getDimensionBounds(reference);
+        }
+
+        void setPositionOffset(float left, float top) {
+            _offset.rect_bounds.left = left;
+            _offset.rect_bounds.top = top;
+        }
+
+        void setDimensionOffset(float width, float height){
+            _offset.rect_bounds.width = width;
+            _offset.rect_bounds.height = height;
+        }
+
+        virtual void TriggerIn() = 0;
+    };
+
+    class TriggerManager {
+    private:
+        std::list<std::unique_ptr<Trigger>> triggers;
+    public:
+        void AddTrigger(std::unique_ptr<Trigger> trig) {
+            triggers.push_back(std::move(trig));
+        }
+
+        void RemoveTrigger(int trigger_id){
+            for (const std::unique_ptr<Trigger>& trigger : triggers){
+                if (trigger->getID() == trigger_id){
+                    trigger->MarkForRemoval();
+                }
+            }
+        }
+
+        void Curate(){
+            triggers.remove_if([](const std::unique_ptr<Trigger>& trigger) {
+                return trigger->ShouldRemove();
+            });
+        }
+
+        void CheckTrigger(ShapeType, const TriggerShooter&);
+        static bool RectangleToRectangleCheck(sf::Vector2f, sf::Vector2f, sf::Vector2f, sf::Vector2f);
+        static bool CircleToCircleCheck(sf::Vector2f, float, sf::Vector2f, float);
+        static bool CircleToRectangleCheck(sf::Vector2f, float, sf::Vector2f, sf::Vector2f);
+    };
+
     /**
      * Main game singleton class.
      */
@@ -189,11 +265,11 @@ namespace mate {
         ///------------------Trigger related stuff
         //Todo: revision
 
-        void AddTrigger(Trigger *const trigger){
-            _trigger_manager.AddTrigger(trigger);
+        void AddTrigger(std::unique_ptr<Trigger> trigger){
+            _trigger_manager.AddTrigger(std::move(trigger));
         }
-        void RemoveTrigger(Trigger *const trigger){
-            _trigger_manager.RemoveTrigger(trigger);
+        void RemoveTrigger(int trigger_id){
+            _trigger_manager.RemoveTrigger(trigger_id);
         }
         //Todo: Deprecate
         TriggerManager* getTriggerManager(){
@@ -222,7 +298,7 @@ namespace mate {
         /**
          * Main game loop
          */
-         [[noreturn]]
+        [[noreturn]]
         void gameLoop(bool isTesting = false);
     };
 
@@ -234,6 +310,5 @@ namespace mate {
 #include "Sprite.h"
 #include "InputActions.h"
 #include "Camera.h"
-#include "Trigger.h"
-
+#include "TriggerShooter.h"
 #endif //GDMATE_GDMBASICS_H

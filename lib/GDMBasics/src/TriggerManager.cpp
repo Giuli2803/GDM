@@ -1,11 +1,9 @@
 //
-// Created by elly_sparky on 01/02/24.
+// Created by elly_sparky on 01/08/24.
 //
-
-#include "Trigger.h"
+#include "GDMBasics.h"
 
 namespace mate {
-
     //Todo: Rotated rectangles
     //Todo: Add depth to triggers
     void TriggerManager::CheckTrigger(ShapeType shape, const TriggerShooter& shooter) {
@@ -13,7 +11,7 @@ namespace mate {
         sf::Vector2f dimensions = shooter.getDimensions();
         float radius, trig_radius;
 
-        for(Trigger* trigger : triggers) {
+        for(const std::unique_ptr<Trigger>& trigger : triggers) {
             sf::Vector2 trig_position = trigger->getPosition();
             sf::Vector2 trig_dimensions = trigger->getDimensions();
 
@@ -61,26 +59,28 @@ namespace mate {
                     }
                     break;
             }
+
+            trigger->CheckRemove();
         }
     }
 
     bool TriggerManager::RectangleToRectangleCheck
-    (sf::Vector2f rect1_pos, sf::Vector2f rect1_dim, sf::Vector2f rect2_pos, sf::Vector2f rect2_dim) {
+            (sf::Vector2f rect1_pos, sf::Vector2f rect1_dim, sf::Vector2f rect2_pos, sf::Vector2f rect2_dim) {
         return (rect1_pos.x + rect1_dim.x > rect2_pos.x
-           && rect1_pos.x < rect2_pos.x + rect2_dim.x
-           && rect1_pos.y < rect2_pos.y + rect2_dim.y
-           && rect1_pos.y + rect1_dim.y > rect2_pos.y);
+                && rect1_pos.x < rect2_pos.x + rect2_dim.x
+                && rect1_pos.y < rect2_pos.y + rect2_dim.y
+                && rect1_pos.y + rect1_dim.y > rect2_pos.y);
     }
 
     bool TriggerManager::CircleToCircleCheck
-    (sf::Vector2f circ1_pos, float circ1_rad, sf::Vector2f circ2_pos, float circ2_rad) {
+            (sf::Vector2f circ1_pos, float circ1_rad, sf::Vector2f circ2_pos, float circ2_rad) {
         double distance = std::sqrt(std::pow(circ1_pos.x - circ2_pos.x, 2)
-                             + std::pow(circ1_pos.y - circ2_pos.y, 2));
+                                    + std::pow(circ1_pos.y - circ2_pos.y, 2));
         return (circ1_rad + circ2_rad > distance);
     }
 
     bool TriggerManager::CircleToRectangleCheck
-    (sf::Vector2f circ_pos, float radius, sf::Vector2f rect_pos, sf::Vector2f rect_dim) {
+            (sf::Vector2f circ_pos, float radius, sf::Vector2f rect_pos, sf::Vector2f rect_dim) {
 
         double distance_x = rect_pos.x + rect_dim.x / 2 - circ_pos.x;
         short sign = std::signbit(distance_x);
@@ -110,12 +110,5 @@ namespace mate {
 
         double distance = std::sqrt(std::pow(distance_y, 2) + std::pow(distance_x, 2));
         return (distance < radius);
-    }
-
-
-    void TriggerShooter::Loop() {
-        if (std::shared_ptr<Element> spt_parent = _parent.lock()) {
-            _manager->CheckTrigger(shape, *this);
-        }
     }
 }

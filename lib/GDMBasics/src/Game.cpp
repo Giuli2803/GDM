@@ -74,6 +74,8 @@ namespace mate{
                 }
             }
 
+            _trigger_manager.Curate();
+
             //Todo: Data loop
             _active_room->DataLoop();
 
