@@ -5,8 +5,8 @@
 #include "Camera.h"
 
 namespace mate{
-    Camera::Camera(std::shared_ptr<Element> parent)
-    : _parent(std::move(parent))
+    Camera::Camera(const std::weak_ptr<Element>& parent)
+    : Component(parent)
     {
         _view.setCenter(sf::Vector2f (0, 0));
         _view.setSize(sf::Vector2f (480, 360));
@@ -22,11 +22,13 @@ namespace mate{
 
     void Camera::Loop() {
         if(_target){
-            _view.setCenter(_parent->getWorldPosition());
-            _view.setRotation(_parent->getWorldRotation());
+            if (std::shared_ptr<Element> spt_parent = _parent.lock()) {
+                _view.setCenter(spt_parent->getWorldPosition());
+                _view.setRotation(spt_parent->getWorldRotation());
 
-            //Todo: Update only once? Or redo just in case?
-            _target->setView(_view);
+                //Todo: Update only once? Or redo just in case?
+                _target->setView(_view);
+            }
         }
     }
 

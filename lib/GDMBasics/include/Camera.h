@@ -9,16 +9,15 @@
 #include "GDMBasics.h"
 
 namespace mate{
-    class Camera {
+    class Camera : public Component {
     public:
-        explicit Camera(std::shared_ptr<Element> parent);
+        explicit Camera(const std::weak_ptr<Element>& parent);
         ~Camera();
 
         enum ScaleType {
             LETTERBOX, RESCALE, REVEAL
         };
     private:
-        std::shared_ptr<Element> _parent;
         sf::View _view;
         std::shared_ptr<sf::RenderTarget> _target;
         float _aspect_ratio;
@@ -53,9 +52,8 @@ namespace mate{
         }
 
         //Other methods declarations
-        void Loop();
-        void RenderLoop() {}
-        void WindowResizeEvent();
+        void Loop() override;
+        void WindowResizeEvent() override;
     };
 }//mate
 

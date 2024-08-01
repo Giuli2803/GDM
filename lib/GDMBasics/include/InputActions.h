@@ -31,13 +31,12 @@ namespace mate{
         std::variant<std::monostate, std::weak_ptr<void>> weakRef;
     };
 
-    class InputActions {
+    class InputActions : public Component {
     private:
-        std::shared_ptr<Element> _parent;
         std::list<ActionEntry> _actions;
     public:
         //Constructors
-        explicit InputActions(std::shared_ptr<Element> parent) : _parent(std::move(parent)){};
+        explicit InputActions(const std::weak_ptr<Element>& parent) : Component(parent){};
 
         template <typename ClassType, typename... Args>
         void AddInput(sf::Keyboard::Key input, void (ClassType::*func)(Args...), std::shared_ptr<ClassType> obj, Args... args) {
@@ -64,9 +63,7 @@ namespace mate{
             _actions.push_back(action);
         }
 
-        void Loop();
-        void RenderLoop() {}
-        void WindowResizeEvent() {}
+        void Loop() override;
     };
 }//mate
 

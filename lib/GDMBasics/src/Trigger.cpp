@@ -9,6 +9,7 @@ namespace mate {
     //Todo: Rotated rectangles
     //Todo: Add depth to triggers
 
+    // Todo: Separate method for better maintainability
     void TriggerManager::CheckTrigger(mate::Bounds bounds, ShapeType shape, Element& shooter) {
         sf::Vector2f position = bounds.getPositionBounds();
         sf::Vector2f dimensions = bounds.getDimensionBounds();
@@ -115,6 +116,9 @@ namespace mate {
 
 
     void TriggerShooter::Loop() {
-        _manager->CheckTrigger(offset, shape, *_parent);
+        if (std::shared_ptr<Element> spt_parent = _parent.lock()) {
+            // Maybe just send the shared pointer?
+            _manager->CheckTrigger(offset, shape, *spt_parent);
+        }
     }
 }

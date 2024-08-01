@@ -12,46 +12,43 @@
 //Todo: TriggerBothWays
 
 namespace mate {
-    class Trigger {
-    private:
-        std::shared_ptr<Element> _parent;
+    class Trigger : public Component {
     public:
         mate::Bounds offset = mate::Bounds();
         ShapeType shape = RECTANGLE;
 
         //Todo: More constructors
-        explicit Trigger(std::shared_ptr<Element> parent) : _parent(std::move(parent)){
-            offset = mate::Bounds(_parent);
+        explicit Trigger(const std::weak_ptr<Element>& parent) : Component(parent){
+            // Todo: Full Bounds rework
+            offset = mate::Bounds(_parent.lock());
             Game::getGame()->AddTrigger(this);
         }
         ~Trigger() {
             Game::getGame()->RemoveTrigger(this);
         }
 
-        void Loop() {}
-        void RenderLoop() {}
-        void WindowResizeEvent() {}
+        void Loop() override {}
+        void RenderLoop() override {}
+        void WindowResizeEvent() override {}
 
         virtual void TriggerIn(Element& shooter) = 0;
     };
 
-    class TriggerShooter {
+    class TriggerShooter: public Component {
     private:
-        std::shared_ptr<Element> _parent;
         TriggerManager *_manager;
     public:
         mate::Bounds offset = mate::Bounds();
         ShapeType shape = RECTANGLE;
 
         //Todo: more constructors
-        explicit TriggerShooter(std::shared_ptr<Element> parent) : _parent(std::move(parent)){
+        explicit TriggerShooter(const std::weak_ptr<Element>& parent) : Component(parent){
             _manager = Game::getGame()->getTriggerManager();
-            offset = mate::Bounds(_parent);
+            // Todo: Bounds full rework
+            offset = mate::Bounds(_parent.lock());
         }
 
-        void Loop();
-        void RenderLoop() {};
-        void WindowResizeEvent() {}
+        void Loop() override;
     };
 }
 

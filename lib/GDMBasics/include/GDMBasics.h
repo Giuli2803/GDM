@@ -85,59 +85,27 @@ namespace mate {
     };
 
     template<class T>
-    concept valid_component = requires(T t) {
-        { t.Loop() } -> std::same_as<void>;
-        { t.RenderLoop() } -> std::same_as<void>;
-        { t.WindowResizeEvent() } -> std::same_as<void>;
-    };
+    concept valid_component = std::is_base_of<Component, T>::value &&
+    requires(std::weak_ptr<Element> element) { T{element}; };
 
     class Component {
     public:
-        template <valid_component T>
-        explicit Component(std::shared_ptr<T> x, std::shared_ptr<class Element> parent)
-        : self_(std::make_unique<model<T>>(std::move(x))), _parent(std::move(parent)) {}
+        explicit Component(std::weak_ptr<class Element> parent) : _parent(std::move(parent)) {}
 
         //Virtual methods
-        void Loop() const {
-            self_->Loop_();
-        }
-        void RenderLoop() const {
-            self_->RenderLoop_();
-        }
-        void WindowResizeEvent() const {
-            self_->WindowResizeEvent_();
-        }
+        virtual void Loop() = 0;
+        virtual void RenderLoop() {};
+        virtual void WindowResizeEvent() {};
 
-    private:
-        struct concept_t {
-            virtual ~concept_t() = default;
-            virtual void Loop_() const = 0;
-            virtual void RenderLoop_() const = 0;
-            virtual void WindowResizeEvent_() const = 0;
-        };
-
-        template<typename T>
-        struct model final : concept_t {
-            explicit model(std::shared_ptr<T> x) : data_(std::move(x)){}
-
-            void Loop_() const override {
-                data_->Loop();
-            }
-            void RenderLoop_() const override {
-                data_->RenderLoop();
-            }
-            void WindowResizeEvent_() const override {
-                data_->WindowResizeEvent();
-            }
-            std::shared_ptr<T> data_;
-        };
-
-        std::shared_ptr<Element> _parent;
-        std::unique_ptr<concept_t> self_;
+    protected:
+        std::weak_ptr<Element> _parent;
     };
 
-    class Element: public mate::LocalCoords {//,  public std::enable_shared_from_this<Element> {
+    class Element: public mate::LocalCoords {
     private:
+        // Shared pointer is used since other components might need to hold a reference, yet this should
+        // be the only shared pointer to this particular components and elements, all others should be weak pointers
+        // Todo: Find a way to use unique_ptr and references maybe.
         std::vector<std::shared_ptr<Component>> _components;
         std::list<std::shared_ptr<Element>> _elements;
         bool _destroy_flag = false;
@@ -149,12 +117,11 @@ namespace mate {
         [[maybe_unused]]
         unsigned long getElementsCount() const { return _elements.size(); }
 
-        //Adds a new Component of the template type to the component list and returns it
-        template<class T>
+        // Adds a new Component of the template type to the component list and returns it
+        template<valid_component T>
         std::shared_ptr<T> addComponent() noexcept {
-            static_assert(valid_component<T>, "component must satisfy valid_component");
             auto new_component = std::make_shared<T>(std::dynamic_pointer_cast<Element>(shared_from_this()));
-            _components.emplace_back(std::make_shared<Component>(new_component, std::dynamic_pointer_cast<Element>(shared_from_this())));
+            _components.emplace_back(new_component);
             return new_component;
         }
 

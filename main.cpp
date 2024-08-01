@@ -8,7 +8,7 @@ namespace mate{
         // A futuro debería crear Factories de los componentes.
         std::shared_ptr<Sprite> _sprite = nullptr;
     public:
-        explicit ColorTrigger(std::shared_ptr<Element> parent) : Trigger(std::move(parent)) {}
+        explicit ColorTrigger(const std::weak_ptr<Element>& parent) : Trigger(parent) {}
 
         void addSprite(Sprite &sprite){
             _sprite = std::make_shared<Sprite>(sprite);
