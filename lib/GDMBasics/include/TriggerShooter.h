@@ -10,14 +10,14 @@
 namespace mate {
     class TriggerShooter: public Component {
     private:
-        TriggerManager *_manager;
+        std::weak_ptr<Game> _game_manager;
         mate::Bounds offset = mate::Bounds();
     public:
         ShapeType shape = RECTANGLE;
 
         //Todo: more constructors
         explicit TriggerShooter(const std::weak_ptr<Element>& parent) : Component(parent){
-            _manager = Game::getGame()->getTriggerManager();
+            _game_manager = Game::getGame();
             // Todo: Bounds full rework
             offset = mate::Bounds();
         }

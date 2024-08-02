@@ -6,8 +6,8 @@
 
 namespace mate {
     void TriggerShooter::Loop() {
-        if (std::shared_ptr<Element> spt_parent = _parent.lock()) {
-            _manager->CheckTrigger(shape, *this);
+        if (std::shared_ptr<Game> spt_game = _game_manager.lock()) {
+            spt_game->CheckTrigger(shape, *this);
         }
     }
 }

@@ -271,9 +271,8 @@ namespace mate {
         void RemoveTrigger(int trigger_id){
             _trigger_manager.RemoveTrigger(trigger_id);
         }
-        //Todo: Deprecate
-        TriggerManager* getTriggerManager(){
-            return &_trigger_manager;
+        void CheckTrigger(ShapeType shape, const TriggerShooter& shooter){
+            _trigger_manager.CheckTrigger(shape, shooter);
         }
 
         ///-------------------------------Longer methods declarations-----------------------------
