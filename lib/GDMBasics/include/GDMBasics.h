@@ -38,7 +38,13 @@ namespace mate {
     struct render_target{
         //Todo: Use an mate::RenderTarget instead of a _target
         std::shared_ptr<sf::RenderWindow> target{};
-        std::list<std::shared_ptr<ord_sprite>> printQueue;
+        std::list<std::weak_ptr<ord_sprite>> printQueue;
+
+        void RemoveSprite(const std::shared_ptr<ord_sprite>& sprite){
+            printQueue.remove_if([&sprite](const std::weak_ptr<ord_sprite>& weak_sprite){
+                return weak_sprite.lock() == sprite;
+            });
+        }
     };
 
     class Room: public mate::LocalCoords {
@@ -143,9 +149,7 @@ namespace mate {
             _offset = mate::Bounds();
         }
 
-        ~Trigger(){
-            std::cout << "success" << std::endl;
-        }
+        ~Trigger() = default;
 
         [[nodiscard]]int getID() const { return id; }
 
@@ -263,8 +267,6 @@ namespace mate {
         }
 
         ///------------------Trigger related stuff
-        //Todo: revision
-
         void AddTrigger(std::unique_ptr<Trigger> trigger){
             _trigger_manager.AddTrigger(std::move(trigger));
         }

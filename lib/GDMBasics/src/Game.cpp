@@ -82,11 +82,24 @@ namespace mate{
             //Todo: Render Loop
             _target.target->clear();
             _active_room->RenderLoop();
-            _target.printQueue.sort([](const std::shared_ptr<ord_sprite>& a, const std::shared_ptr<ord_sprite>& b)
-            { return a->depth < b->depth; });
 
-            for(const std::shared_ptr<ord_sprite>& sp : _target.printQueue){
-                _target.target->draw(sp->sprite);
+            _target.printQueue.remove_if([](const std::weak_ptr<ord_sprite>& spt) {
+                return spt.expired();
+            });
+
+            // Since the printQueue has just been curated and there are no concurrent tasks that can change that state
+            // until the end of the frame, we can safely assume that weak_ptr<ord_sprite>::lock() returns a
+            // valid shared_ptr<ord_sprite> without checking.
+            _target.printQueue.sort([](const std::weak_ptr<ord_sprite>& a, const std::weak_ptr<ord_sprite>& b)
+            {
+                auto spt_a = a.lock();
+                auto spt_b = b.lock();
+                return spt_a->depth < spt_b->depth;
+            });
+
+            for(const std::weak_ptr<ord_sprite>& sprite : _target.printQueue){
+                auto spt_sprite = sprite.lock();
+                _target.target->draw(spt_sprite->sprite);
             }
 
             _target.target->display();

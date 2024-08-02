@@ -10,12 +10,12 @@ namespace mate{
         _texture.loadFromFile("../Square.png");
         _sprite->sprite.setTexture(_texture, true);
         _target = mate::Game::getGame()->getWindowTarget();
-        _target->printQueue.insert(_target->printQueue.end(), _sprite);
+        _target->printQueue.push_back(_sprite);
     }
 
     Sprite::~Sprite(){
         if(_target)
-            _target->printQueue.remove(_sprite);
+            _target->RemoveSprite(_sprite);
     }
 
     //Todo: Currently _actualize allows to freeze a sprite even when the _element is changing, print in the other hand

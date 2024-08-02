@@ -6,7 +6,7 @@ namespace mate{
         // Al destruirse el elemento va a seguir existiendo el sprite por esta referencia, debería ser un weak_ptr
         // No es muy importante porque solo es un código de test, pero esta bueno saberlo.
         // A futuro debería crear Factories de los componentes.
-        std::shared_ptr<Sprite> _sprite = nullptr;
+        std::weak_ptr<Sprite> _sprite;
     public:
         explicit ColorTrigger(const std::weak_ptr<Element>& parent) : Trigger(parent, true) {}
 
@@ -15,8 +15,8 @@ namespace mate{
         }
 
         void TriggerIn() override{
-            if(_sprite)
-                _sprite->setColor(sf::Color::Green);
+            if(auto spt_sprite = _sprite.lock())
+                spt_sprite->setColor(sf::Color::Green);
         }
     };
 }
@@ -80,13 +80,14 @@ namespace mate{
         sprite2->setTexture("../Circle.png");
         sprite2->setColor(sf::Color::Magenta);
         sprite2->setDepth(-10);
+        input1->AddInput(sf::Keyboard::W, &mate::Element::Destroy, sptElem1);
         input1->AddInput(sf::Keyboard::A, &mate::Element::Destroy, std::move(child0));
         input1->AddInput(sf::Keyboard::D, &mate::Element::Destroy, child1);
         input1->AddInput(sf::Keyboard::S, &print);
         input1->AddInput(sf::Keyboard::Space, &mate::Sprite::setColor, sprite2, sf::Color::Magenta);
         //ColorTrigger
         auto color = std::make_unique<ColorTrigger>(sptElem1);
-        input1->AddInput(sf::Keyboard::W, &mate::Game::RemoveTrigger, game, color->getID());
+        //input1->AddInput(sf::Keyboard::W, &mate::Game::RemoveTrigger, game, color->getID());
         color->addSprite(*sprite2);
         color->shape = mate::CIRCLE;
         color->setDimensionOffset(64, 64);
