@@ -17,7 +17,7 @@ namespace mate{
     private:
         sf::Texture _texture;
         std::shared_ptr<ord_sprite> _sprite;
-        render_target *_target;
+        std::weak_ptr<Game> _game_manager;
 
         bool _actualize = true;
         unsigned int _depth = 0;

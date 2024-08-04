@@ -9,13 +9,14 @@ namespace mate{
         _sprite = std::make_shared<ord_sprite>();
         _texture.loadFromFile("../Square.png");
         _sprite->sprite.setTexture(_texture, true);
-        _target = mate::Game::getGame()->getWindowTarget();
-        _target->printQueue.push_back(_sprite);
+        auto spt_game = Game::getGame();
+        spt_game->AddSprite(_sprite);
+        _game_manager = spt_game;
     }
 
     Sprite::~Sprite(){
-        if(_target)
-            _target->RemoveSprite(_sprite);
+        if(auto spt_game = _game_manager.lock())
+            spt_game->RemoveSprite(_sprite);
     }
 
     //Todo: Currently _actualize allows to freeze a sprite even when the _element is changing, print in the other hand

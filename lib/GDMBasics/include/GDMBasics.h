@@ -246,7 +246,6 @@ namespace mate {
         ///-----------------Window related stuff
         [[nodiscard]]
         std::shared_ptr<sf::RenderWindow> getWindow() const { return _target.target; }
-        render_target* getWindowTarget() { return &_target; }
         [[maybe_unused]]
         void setWindowSize(int x, int y) const {
             _target.target->setSize(sf::Vector2u (x, y));
@@ -264,6 +263,14 @@ namespace mate {
         [[maybe_unused]]
         std::shared_ptr<Room> getMainRoom() {
             return _active_room;
+        }
+
+        ///------------------Sprites related stuff
+        void AddSprite(const std::shared_ptr<ord_sprite>& sprite){
+            _target.printQueue.push_back(sprite);
+        }
+        void RemoveSprite(const std::shared_ptr<ord_sprite>& sprite){
+            _target.RemoveSprite(sprite);
         }
 
         ///------------------Trigger related stuff

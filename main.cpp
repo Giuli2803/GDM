@@ -10,8 +10,8 @@ namespace mate{
     public:
         explicit ColorTrigger(const std::weak_ptr<Element>& parent) : Trigger(parent, true) {}
 
-        void addSprite(Sprite &sprite){
-            _sprite = std::make_shared<Sprite>(sprite);
+        void addSprite(const std::shared_ptr<Sprite>& sprite){
+            _sprite = sprite;
         }
 
         void TriggerIn() override{
@@ -40,13 +40,11 @@ namespace mate{
         auto camElem = mainRoom->AddElement();
         //*camera component
         auto camera = camElem->addComponent<mate::Camera>();
-        camera->setScaleType(mate::Camera::ScaleType::LETTERBOX);
+        camera->setScaleType(mate::Camera::ScaleType::REVEAL);
 
         auto sptElem0 = mainRoom->AddElement();
-        auto sptElemTest = mainRoom->AddElement();
         //*sprite component
-        auto spriteTest = sptElemTest->addComponent<mate::Sprite>();
-        auto sprite1 = sptElem0->addComponent<mate::Sprite>(); // Error: El sprite este se sigue viendo despues de ser destruido el elemento. No ocurre con los hijos.
+        auto sprite1 = sptElem0->addComponent<mate::Sprite>();
         sprite1->setColor(sf::Color::Red);
         //*input action component
         auto input1 = sptElem0->addComponent<mate::InputActions>();
@@ -72,26 +70,29 @@ namespace mate{
         child1->addComponent<mate::Sprite>();
 
         auto sptElem1 = mainRoom->AddElement();
-        sptElem1->setPosition(20, 0);
+        sptElem1->setPosition(0, 0);
         sptElem1->setScale(2, 2);
         sptElem1->setDepth(-2);
         //Sprite component
         auto sprite2 = sptElem1->addComponent<mate::Sprite>();
         sprite2->setTexture("../Circle.png");
         sprite2->setColor(sf::Color::Magenta);
-        sprite2->setDepth(-10);
-        input1->AddInput(sf::Keyboard::W, &mate::Element::Destroy, sptElem1);
-        input1->AddInput(sf::Keyboard::A, &mate::Element::Destroy, std::move(child0));
-        input1->AddInput(sf::Keyboard::D, &mate::Element::Destroy, child1);
-        input1->AddInput(sf::Keyboard::S, &print);
-        input1->AddInput(sf::Keyboard::Space, &mate::Sprite::setColor, sprite2, sf::Color::Magenta);
+        //sprite2->setDepth(-10);
         //ColorTrigger
         auto color = std::make_unique<ColorTrigger>(sptElem1);
         //input1->AddInput(sf::Keyboard::W, &mate::Game::RemoveTrigger, game, color->getID());
-        color->addSprite(*sprite2);
+        color->addSprite(sprite2);
         color->shape = mate::CIRCLE;
         color->setDimensionOffset(64, 64);
         game->AddTrigger(std::move(color));
+
+
+        input1->AddInput(sf::Keyboard::W, &mate::Element::Destroy, sptElem1);
+        input1->AddInput(sf::Keyboard::A, &mate::Element::Destroy, child0);
+        input1->AddInput(sf::Keyboard::D, &mate::Element::Destroy, child1);
+        input1->AddInput(sf::Keyboard::S, &print);
+        input1->AddInput(sf::Keyboard::Space, &mate::Sprite::setColor, sprite2, sf::Color::Magenta);
+
 
         return game;
     }
