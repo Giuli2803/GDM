@@ -37,7 +37,7 @@ namespace mate {
 
     struct render_target{
         //Todo: Use an mate::RenderTarget instead of a _target
-        std::shared_ptr<sf::RenderWindow> target{};
+        std::unique_ptr<sf::RenderWindow> target{};
         std::list<std::weak_ptr<ord_sprite>> printQueue;
 
         void RemoveSprite(const std::shared_ptr<ord_sprite>& sprite){
@@ -233,7 +233,7 @@ namespace mate {
          * Private constructor. Generates the window.
          */
         Game(){
-            _target.target = std::make_shared<sf::RenderWindow>(sf::VideoMode(800, 400), "Game");
+            _target.target = std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 400), "Game");
             _active_room = nullptr;
         };
     public:
@@ -244,8 +244,6 @@ namespace mate {
         ///---------------------------------------------Simple methods----------------------------
 
         ///-----------------Window related stuff
-        [[nodiscard]] [[deprecated("Use one of the methods on Game to directly modify window values instead")]]
-        std::weak_ptr<sf::RenderWindow> getWindow() const { return _target.target; }
         void setWindowView(sf::View view) const { _target.target->setView(view); }
         void setWindowView() const { _target.target->setView(_target.target->getDefaultView()); }
         sf::Vector2u getWindowSize() { return _target.target->getSize(); }
