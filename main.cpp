@@ -22,8 +22,8 @@ namespace mate{
 }
 
 void print(){
-    auto win = mate::Game::getGame()->getWindow();
-    win->setSize(sf::Vector2u (960, 360));
+    auto game = mate::Game::getGame();
+    game->setWindowSize(960, 340);
 }
 
 int main(){

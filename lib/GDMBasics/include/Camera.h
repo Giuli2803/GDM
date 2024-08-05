@@ -19,7 +19,7 @@ namespace mate{
         };
     private:
         sf::View _view;
-        std::shared_ptr<sf::RenderTarget> _target;
+        std::weak_ptr<Game> _game_manager;
         float _aspect_ratio;
         ScaleType _scale_type = RESCALE;
     public:
@@ -46,10 +46,10 @@ namespace mate{
             _scale_type = scale_type;
         }
 
-        [[maybe_unused]]
+        /*[[maybe_unused]]
         void setTarget(std::shared_ptr<sf::RenderTarget> target){
             _target = std::move(target);
-        }
+        }*/
 
         //Other methods declarations
         void Loop() override;

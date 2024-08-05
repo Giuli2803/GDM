@@ -10,38 +10,45 @@ namespace mate{
     {
         _view.setCenter(sf::Vector2f (0, 0));
         _view.setSize(sf::Vector2f (480, 360));
-        _target = mate::Game::getGame()->getWindow();
-        _target->setView(_view);
+        _game_manager = mate::Game::getGame();
+        if(auto _spt_game = _game_manager.lock()) {
+            _spt_game->setWindowView(_view);
+        }
         _aspect_ratio = 4.0f/3.0f;
     }
 
     Camera::~Camera(){
-        _target->setView(_target->getDefaultView());
-        _target = nullptr;
+        if(auto _spt_game = _game_manager.lock()) {
+            _spt_game->setWindowView();
+        }
     }
 
     void Camera::Loop() {
-        if(_target){
+        if(auto _spt_game = _game_manager.lock()){
             if (std::shared_ptr<Element> spt_parent = _parent.lock()) {
                 _view.setCenter(spt_parent->getWorldPosition());
                 _view.setRotation(spt_parent->getWorldRotation());
 
                 //Todo: Update only once? Or redo just in case?
-                _target->setView(_view);
+                _spt_game->setWindowView(_view);
             }
         }
     }
 
     void Camera::WindowResizeEvent() {
+        auto _spt_game = _game_manager.lock();
+        if (!_spt_game){
+            return;
+        }
         switch (_scale_type) {
             case RESCALE:
                 break;
             case REVEAL:
-                _view.setSize(_target->getSize().x, _target->getSize().y);
+                _view.setSize((float) _spt_game->getWindowSize().x, (float) _spt_game->getWindowSize().y);
                 break;
             case LETTERBOX:
-                float m_window_width = _target->getSize().x;
-                float m_window_height = _target->getSize().y;
+                float m_window_width = (float) _spt_game->getWindowSize().x;
+                float m_window_height = (float) _spt_game->getWindowSize().y;
                 float new_width = _aspect_ratio * m_window_height;
                 float new_height = m_window_width / _aspect_ratio;
                 float offset_width = (m_window_width - new_width) / 2.0f;

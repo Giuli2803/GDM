@@ -244,9 +244,11 @@ namespace mate {
         ///---------------------------------------------Simple methods----------------------------
 
         ///-----------------Window related stuff
-        [[nodiscard]]
-        std::shared_ptr<sf::RenderWindow> getWindow() const { return _target.target; }
-        [[maybe_unused]]
+        [[nodiscard]] [[deprecated("Use one of the methods on Game to directly modify window values instead")]]
+        std::weak_ptr<sf::RenderWindow> getWindow() const { return _target.target; }
+        void setWindowView(sf::View view) const { _target.target->setView(view); }
+        void setWindowView() const { _target.target->setView(_target.target->getDefaultView()); }
+        sf::Vector2u getWindowSize() { return _target.target->getSize(); }
         void setWindowSize(int x, int y) const {
             _target.target->setSize(sf::Vector2u (x, y));
         }
