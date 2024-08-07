@@ -11,9 +11,9 @@ namespace mate{
         _view.setCenter(sf::Vector2f (0, 0));
         _view.setSize(sf::Vector2f (480, 360));
         _game_manager = mate::Game::getGame();
-        if(auto _spt_game = _game_manager.lock()) {
+        /*if(auto _spt_game = _game_manager.lock()) {
             _spt_game->setWindowView(_view);
-        }
+        }*/
         _aspect_ratio = 4.0f/3.0f;
     }
 
@@ -24,13 +24,15 @@ namespace mate{
     }
 
     void Camera::Loop() {
-        if(auto _spt_game = _game_manager.lock()){
+        if(auto _spt_game = _game_manager.lock()) {
             if (std::shared_ptr<Element> spt_parent = _parent.lock()) {
                 _view.setCenter(spt_parent->getWorldPosition());
                 _view.setRotation(spt_parent->getWorldRotation());
 
                 //Todo: Update only once? Or redo just in case?
-                _spt_game->setWindowView(_view);
+                if (target_id == 0)
+                    _spt_game->setWindowView(_view);
+
             }
         }
     }

@@ -36,14 +36,25 @@ namespace mate {
     };
 
     struct render_target{
-        //Todo: Use an mate::RenderTarget instead of a _target
+        //Todo: Use an sf::RenderTarget instead of a _target
+
+        // The target contains the dimensions of the window where the  sprites will be printed
         std::unique_ptr<sf::RenderWindow> target{};
+        // List of sprites on the scene
         std::list<std::weak_ptr<ord_sprite>> printQueue;
+        const u_int id;
+
+        render_target() : id(generate_id()) {}
 
         void RemoveSprite(const std::shared_ptr<ord_sprite>& sprite){
             printQueue.remove_if([&sprite](const std::weak_ptr<ord_sprite>& weak_sprite){
                 return weak_sprite.lock() == sprite;
             });
+        }
+    private:
+        static int generate_id(){
+            static int unique_id = 0;
+            return unique_id++;
         }
     };
 
@@ -225,7 +236,8 @@ namespace mate {
     private:
         std::list<std::shared_ptr<Room>> _rooms;
         std::shared_ptr<Room> _active_room;
-        render_target _target;
+        render_target _main_render_target;
+        std::list<render_target> _secondary_targets;
         TriggerManager _trigger_manager;
         static std::shared_ptr<Game> _instance;
 
@@ -233,7 +245,7 @@ namespace mate {
          * Private constructor. Generates the window.
          */
         Game(){
-            _target.target = std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 400), "Game");
+            _main_render_target.target = std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 400), "Game");
             _active_room = nullptr;
         };
     public:
@@ -244,12 +256,24 @@ namespace mate {
         ///---------------------------------------------Simple methods----------------------------
 
         ///-----------------Window related stuff
-        void setWindowView(sf::View view) const { _target.target->setView(view); }
-        void setWindowView() const { _target.target->setView(_target.target->getDefaultView()); }
-        sf::Vector2u getWindowSize() { return _target.target->getSize(); }
+        void setWindowView(sf::View view) const { _main_render_target.target->setView(view); }
+        void setWindowView() const { _main_render_target.target->setView(_main_render_target.target->getDefaultView()); }
+        sf::Vector2u getWindowSize() { return _main_render_target.target->getSize(); }
         void setWindowSize(int x, int y) const {
-            _target.target->setSize(sf::Vector2u (x, y));
+            _main_render_target.target->setSize(sf::Vector2u (x, y));
         }
+
+        ///-----------------Render Targets related stuff
+        [[nodiscard]]
+        u_int AddSecondaryTarget(sf::View view) {
+            render_target new_target;
+            u_int id = new_target.id;
+            new_target.target = std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 400), "Game: Second Window");
+            new_target.target->setView(view);
+            _secondary_targets.push_back(std::move(new_target));
+            return id;
+        }
+        //void setSecondaryView()
 
         ///-----------------Rooms related stuff
         /**
@@ -267,10 +291,10 @@ namespace mate {
 
         ///------------------Sprites related stuff
         void AddSprite(const std::shared_ptr<ord_sprite>& sprite){
-            _target.printQueue.push_back(sprite);
+            _main_render_target.printQueue.push_back(sprite);
         }
         void RemoveSprite(const std::shared_ptr<ord_sprite>& sprite){
-            _target.RemoveSprite(sprite);
+            _main_render_target.RemoveSprite(sprite);
         }
 
         ///------------------Trigger related stuff

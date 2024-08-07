@@ -23,6 +23,7 @@ namespace mate{
         float _aspect_ratio;
         ScaleType _scale_type = RESCALE;
     public:
+        u_int target_id = 0;
         //Simple methods
         void setSize(float x, float y){
             _view.setSize(x, y);
@@ -46,10 +47,15 @@ namespace mate{
             _scale_type = scale_type;
         }
 
-        /*[[maybe_unused]]
-        void setTarget(std::shared_ptr<sf::RenderTarget> target){
-            _target = std::move(target);
-        }*/
+        void setTarget(u_int id){
+            target_id = id;
+        }
+
+        void UseNewTarget(){
+            if(auto _spt_game = _game_manager.lock()) {
+                target_id = _spt_game->AddSecondaryTarget(_view);
+            }
+        }
 
         //Other methods declarations
         void Loop() override;

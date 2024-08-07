@@ -42,6 +42,11 @@ namespace mate{
         auto camera = camElem->addComponent<mate::Camera>();
         camera->setScaleType(mate::Camera::ScaleType::REVEAL);
 
+        auto camElem2 = mainRoom->AddElement();
+        //*camera component
+        auto camera2 = camElem2->addComponent<mate::Camera>();
+        camera2->UseNewTarget();
+
         auto sptElem0 = mainRoom->AddElement();
         //*sprite component
         auto sprite1 = sptElem0->addComponent<mate::Sprite>();
