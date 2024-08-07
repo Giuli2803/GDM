@@ -9,6 +9,12 @@
 #include <memory>
 
 namespace mate {
+    template <typename T>
+    bool weak_ptr_is_uninitialized(std::weak_ptr<T> const& weak) {
+        using wt = std::weak_ptr<T>;
+        return !weak.owner_before(wt{}) && !wt{}.owner_before(weak);
+    }
+
     class Bounds {
     public:
         sf::Rect<float> rect_bounds;
@@ -35,7 +41,7 @@ namespace mate {
 
     class LocalCoords : public sf::Transformable, public std::enable_shared_from_this<LocalCoords> {
     private:
-        std::shared_ptr<LocalCoords> _parent;
+        std::weak_ptr<LocalCoords> _parent;
         int _depth = 0;
     public:
         ///----------------------------- Constructors
@@ -43,22 +49,22 @@ namespace mate {
         LocalCoords();
 
         [[maybe_unused]]
-        explicit LocalCoords(sf::Vector2f position, std::shared_ptr<LocalCoords> parent);
+        explicit LocalCoords(sf::Vector2f position, const std::shared_ptr<LocalCoords>& parent);
         [[maybe_unused]]
-        explicit LocalCoords(sf::Vector2f, float, std::shared_ptr<LocalCoords> parent);
+        explicit LocalCoords(sf::Vector2f, float, const std::shared_ptr<LocalCoords>& parent);
         [[maybe_unused]]
-        explicit LocalCoords(sf::Vector2f, sf::Vector2f, float, std::shared_ptr<LocalCoords> parent);
+        explicit LocalCoords(sf::Vector2f, sf::Vector2f, float, const std::shared_ptr<LocalCoords>& parent);
 
         ///---------------------------------- Getters
         sf::Vector2f getWorldPosition();
         sf::Vector2f getWorldScale();
         float getWorldRotation() const;
-        std::shared_ptr<LocalCoords> getParent() const { return _parent; }
+        std::weak_ptr<LocalCoords> getParent() const { return _parent; }
         int getDepth() const { return _depth; }
 
         ///----------------------------------- Setters
         void setDepth(int depth) { _depth = depth; }
-        void setParent(std::shared_ptr<LocalCoords> parent) { _parent = std::move(parent); }
+        void setParent(const std::weak_ptr<LocalCoords>& parent) { _parent = parent; }
     };
 } // mate
 

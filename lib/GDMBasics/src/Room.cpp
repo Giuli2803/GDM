@@ -7,7 +7,7 @@
 namespace mate {
     [[maybe_unused]]
     void Room::AddElement(std::shared_ptr<Element> element) {
-        if(element->getParent() == nullptr)
+        if(weak_ptr_is_uninitialized(element->getParent()))
             element->setParent(shared_from_this());
         _elements.push_back(std::move(element));
     }

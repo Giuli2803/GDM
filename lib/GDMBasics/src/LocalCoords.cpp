@@ -13,45 +13,45 @@ namespace mate {
     }
 
     [[maybe_unused]]
-    LocalCoords::LocalCoords(sf::Vector2f position, std::shared_ptr<LocalCoords> parent)
-    : _parent(std::move(parent)) {
+    LocalCoords::LocalCoords(sf::Vector2f position, const std::shared_ptr<LocalCoords>& parent)
+    : _parent(parent) {
         setPosition(position);
     }
 
     [[maybe_unused]]
-    LocalCoords::LocalCoords(sf::Vector2f position, float rotation, std::shared_ptr<LocalCoords> parent)
-    : _parent(std::move(parent)) {
+    LocalCoords::LocalCoords(sf::Vector2f position, float rotation, const std::shared_ptr<LocalCoords>& parent)
+    : _parent(parent) {
         setPosition(position);
         setRotation(rotation);
     }
 
     [[maybe_unused]]
-    LocalCoords::LocalCoords(sf::Vector2f position, sf::Vector2f scale, float rotation, std::shared_ptr<LocalCoords> parent)
-    : _parent(std::move(parent)) {
+    LocalCoords::LocalCoords(sf::Vector2f position, sf::Vector2f scale, float rotation, const std::shared_ptr<LocalCoords>& parent)
+    : _parent(parent) {
         setPosition(position);
         setScale(scale);
         setRotation(rotation);
     }
 
     sf::Vector2f LocalCoords::getWorldPosition() {
-        if(_parent)
-            return _parent->getWorldPosition() + getPosition();
+        if(auto spt_parent = _parent.lock())
+            return spt_parent->getWorldPosition() + getPosition();
         else
             return getPosition();
     }
 
     sf::Vector2f LocalCoords::getWorldScale() {
         sf::Vector2f newScale = getScale();
-        if(_parent){
-            newScale.x *= _parent->getWorldScale().x;
-            newScale.y *= _parent->getWorldScale().y;
+        if(auto spt_parent = _parent.lock()){
+            newScale.x *= spt_parent->getWorldScale().x;
+            newScale.y *= spt_parent->getWorldScale().y;
         }
         return newScale;
     }
 
     float LocalCoords::getWorldRotation() const {
-        if(_parent)
-            return _parent->getWorldRotation() + getRotation();
+        if(auto spt_parent = _parent.lock())
+            return spt_parent->getWorldRotation() + getRotation();
         else
             return getRotation();
     }
