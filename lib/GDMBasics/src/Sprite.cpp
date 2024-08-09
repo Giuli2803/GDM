@@ -10,13 +10,11 @@ namespace mate{
         _texture.loadFromFile("../Square.png");
         _sprite->sprite.setTexture(_texture, true);
         auto spt_game = Game::getGame();
-        spt_game->AddSprite(_sprite);
         _game_manager = spt_game;
     }
 
     Sprite::~Sprite(){
-        if(auto spt_game = _game_manager.lock())
-            spt_game->RemoveSprite(_sprite);
+        // Todo: Remove all cameras
     }
 
     //Todo: Currently _actualize allows to freeze a sprite even when the _element is changing, print in the other hand

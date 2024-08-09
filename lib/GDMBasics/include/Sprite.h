@@ -38,6 +38,10 @@ namespace mate{
             _sprite->sprite.setColor(color);
         }
 
+        std::shared_ptr<const ord_sprite> getSprite(){
+            return _sprite;
+        }
+
         [[maybe_unused]]
         void setColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha){
             _sprite->sprite.setColor(sf::Color(red, green, blue, alpha));

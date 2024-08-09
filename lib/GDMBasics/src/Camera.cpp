@@ -2,6 +2,7 @@
 // Created by elly_sparky on 23/01/24.
 //
 
+#include "GDMBasics.h"
 #include "Camera.h"
 
 namespace mate{
@@ -11,9 +12,6 @@ namespace mate{
         _view.setCenter(sf::Vector2f (0, 0));
         _view.setSize(sf::Vector2f (480, 360));
         _game_manager = mate::Game::getGame();
-        /*if(auto _spt_game = _game_manager.lock()) {
-            _spt_game->setWindowView(_view);
-        }*/
         _aspect_ratio = 4.0f/3.0f;
     }
 
@@ -24,16 +22,37 @@ namespace mate{
     }
 
     void Camera::Loop() {
-        if(auto _spt_game = _game_manager.lock()) {
-            if (std::shared_ptr<Element> spt_parent = _parent.lock()) {
-                _view.setCenter(spt_parent->getWorldPosition());
-                _view.setRotation(spt_parent->getWorldRotation());
 
-                //Todo: Update only once? Or redo just in case?
-                if (target_id == 0)
-                    _spt_game->setWindowView(_view);
+    }
 
-            }
+    void Camera::RenderLoop() {
+        auto _spt_game = _game_manager.lock();
+        if (!_spt_game){
+            return;
+        }
+
+        if (std::shared_ptr<Element> spt_parent = _parent.lock()) {
+            _view.setCenter(spt_parent->getWorldPosition());
+            _view.setRotation(spt_parent->getWorldRotation());
+        }
+
+        if (target_id == 0)
+            _spt_game->setWindowView(_view);
+        else
+            _spt_game->setWindowView(_view, target_id);
+
+        _visible_sprites.remove_if([](const std::weak_ptr<const ord_sprite>& sprite)
+        { return sprite.expired(); });
+
+        _visible_sprites.sort([](const std::weak_ptr<const ord_sprite>& a, const std::weak_ptr<const ord_sprite>& b)
+        {
+            auto spt_a = a.lock();
+            auto spt_b = b.lock();
+            return spt_a->depth < spt_b->depth;
+        });
+
+        for(const auto& sprite : _visible_sprites){
+            _spt_game->Draw(sprite.lock(), target_id);
         }
     }
 

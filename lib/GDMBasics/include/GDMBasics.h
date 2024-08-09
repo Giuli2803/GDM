@@ -40,17 +40,9 @@ namespace mate {
 
         // The target contains the dimensions of the window where the  sprites will be printed
         std::unique_ptr<sf::RenderWindow> target{};
-        // List of sprites on the scene
-        std::list<std::weak_ptr<ord_sprite>> printQueue;
         const u_int id;
 
         render_target() : id(generate_id()) {}
-
-        void RemoveSprite(const std::shared_ptr<ord_sprite>& sprite){
-            printQueue.remove_if([&sprite](const std::weak_ptr<ord_sprite>& weak_sprite){
-                return weak_sprite.lock() == sprite;
-            });
-        }
     private:
         static int generate_id(){
             static int unique_id = 0;
@@ -257,10 +249,28 @@ namespace mate {
 
         ///-----------------Window related stuff
         void setWindowView(sf::View view) const { _main_render_target.target->setView(view); }
+        void setWindowView(sf::View view, u_int id) const {
+            for (const auto& target : _secondary_targets){
+                if(target.id == id){
+                    target.target->setView(view);
+                }
+            }
+        }
         void setWindowView() const { _main_render_target.target->setView(_main_render_target.target->getDefaultView()); }
         [[nodiscard]] sf::Vector2u getWindowSize() const { return _main_render_target.target->getSize(); }
         void setWindowSize(int x, int y) const {
             _main_render_target.target->setSize(sf::Vector2u (x, y));
+        }
+
+        void Draw(const std::shared_ptr<const ord_sprite>& sprite, u_int id){
+            if (id == 0){
+                _main_render_target.target->draw(sprite->sprite);
+            } else
+            {
+                for (const auto &target: _secondary_targets) {
+                    target.target->draw(sprite->sprite);
+                }
+            }
         }
 
         ///-----------------Render Targets related stuff
@@ -287,14 +297,6 @@ namespace mate {
         [[maybe_unused]]
         std::shared_ptr<Room> getMainRoom() {
             return _active_room;
-        }
-
-        ///------------------Sprites related stuff
-        void AddSprite(const std::shared_ptr<ord_sprite>& sprite){
-            _main_render_target.printQueue.push_back(sprite);
-        }
-        void RemoveSprite(const std::shared_ptr<ord_sprite>& sprite){
-            _main_render_target.RemoveSprite(sprite);
         }
 
         ///------------------Trigger related stuff
@@ -339,8 +341,8 @@ namespace mate {
     game_instance Start();
 }
 
+#include "Camera.h"
 #include "Sprite.h"
 #include "InputActions.h"
-#include "Camera.h"
 #include "TriggerShooter.h"
 #endif //GDMATE_GDMBASICS_H

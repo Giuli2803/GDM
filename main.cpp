@@ -32,8 +32,7 @@ int main(){
 }
 
 namespace mate{
-    game_instance Start()
-    {
+    game_instance Start() {
         auto mainRoom = std::make_shared<mate::Room>();
         auto game = mate::Game::getGame(480, 360, "MyGame", mainRoom);
 
@@ -50,6 +49,7 @@ namespace mate{
         auto sptElem0 = mainRoom->AddElement();
         //*sprite component
         auto sprite1 = sptElem0->addComponent<mate::Sprite>();
+        camera->addSprite(sprite1->getSprite());
         sprite1->setColor(sf::Color::Red);
         //*input action component
         auto input1 = sptElem0->addComponent<mate::InputActions>();
@@ -66,13 +66,13 @@ namespace mate{
         child0->setDepth(-1);
         child0->setPosition(-20, 0);
         child0->setScale(0.5, 0.5);
-        child0->addComponent<mate::Sprite>();
+        camera->addSprite((child0->addComponent<mate::Sprite>())->getSprite());
 
         auto child1 = sptElem0->AddChild();
         child1->setDepth(-1);
         child1->setPosition(55, 0);
         child1->setScale(0.5, 0.5);
-        child1->addComponent<mate::Sprite>();
+        camera->addSprite((child1->addComponent<mate::Sprite>())->getSprite());
 
         auto sptElem1 = mainRoom->AddElement();
         sptElem1->setPosition(0, 0);
@@ -82,6 +82,7 @@ namespace mate{
         auto sprite2 = sptElem1->addComponent<mate::Sprite>();
         sprite2->setTexture("../Circle.png");
         sprite2->setColor(sf::Color::Magenta);
+        camera2->addSprite(sprite2->getSprite());
         //sprite2->setDepth(-10);
         //ColorTrigger
         auto color = std::make_unique<ColorTrigger>(sptElem1);
