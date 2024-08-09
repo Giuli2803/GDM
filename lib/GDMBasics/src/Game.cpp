@@ -81,6 +81,10 @@ namespace mate{
 
             //Todo: Render Loop
             _main_render_target.target->clear();
+            for (const auto& target : _secondary_targets){
+                target.target->clear();
+            }
+
             _active_room->RenderLoop();
 
             _main_render_target.printQueue.remove_if([](const std::weak_ptr<ord_sprite>& spt) {
@@ -103,6 +107,11 @@ namespace mate{
             }
 
             _main_render_target.target->display();
+
+            for (const auto& target : _secondary_targets){
+                target.target->display();
+            }
+
             // Todo: Secondary targets
         } while (_main_render_target.target->isOpen() && !isTesting);
         exit(0);
