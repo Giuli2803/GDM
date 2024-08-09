@@ -258,7 +258,7 @@ namespace mate {
         ///-----------------Window related stuff
         void setWindowView(sf::View view) const { _main_render_target.target->setView(view); }
         void setWindowView() const { _main_render_target.target->setView(_main_render_target.target->getDefaultView()); }
-        sf::Vector2u getWindowSize() const { return _main_render_target.target->getSize(); }
+        [[nodiscard]] sf::Vector2u getWindowSize() const { return _main_render_target.target->getSize(); }
         void setWindowSize(int x, int y) const {
             _main_render_target.target->setSize(sf::Vector2u (x, y));
         }
