@@ -12,10 +12,16 @@ namespace mate
     setScale(1.0f, 1.0f);
 }
 
+[[maybe_unused]] LocalCoords::LocalCoords(const std::weak_ptr<LocalCoords> &parent) : _parent(parent)
+{
+    setScale(1.0f, 1.0f);
+}
+
 [[maybe_unused]] LocalCoords::LocalCoords(sf::Vector2f position, const std::shared_ptr<LocalCoords> &parent)
     : _parent(parent)
 {
     setPosition(position);
+    setScale(1.0f, 1.0f);
 }
 
 [[maybe_unused]] LocalCoords::LocalCoords(sf::Vector2f position, float rotation,
@@ -23,7 +29,15 @@ namespace mate
     : _parent(parent)
 {
     setPosition(position);
+    setScale(1.0f, 1.0f);
     setRotation(rotation);
+}
+
+[[maybe_unused]] LocalCoords::LocalCoords(sf::Vector2f position, sf::Vector2f scale, const std::shared_ptr<LocalCoords> &parent)
+    :_parent(parent)
+{
+    setPosition(position);
+    setScale(scale);
 }
 
 [[maybe_unused]] LocalCoords::LocalCoords(sf::Vector2f position, sf::Vector2f scale, float rotation,
