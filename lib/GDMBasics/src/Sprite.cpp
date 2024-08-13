@@ -3,31 +3,47 @@
 //
 #include "Sprite.h"
 
-namespace mate{
-    Sprite::Sprite(const std::weak_ptr<Element>& parent)
-    : Component(parent){
-        _sprite = std::make_shared<ord_sprite>();
-        _texture.loadFromFile("../Square.png");
-        _sprite->sprite.setTexture(_texture, true);
-        auto spt_game = Game::getGame();
-        _game_manager = spt_game;
-    }
+namespace mate
+{
+Sprite::Sprite(const std::weak_ptr<Element> &parent) : Component(parent)
+{
+    _sprite = std::make_shared<ord_sprite>();
+    _texture.loadFromFile("../Square.png");
+    _sprite->sprite.setTexture(_texture, true);
+    auto spt_game = Game::getGame();
+    _game_manager = spt_game;
+}
 
-    Sprite::~Sprite(){
-        // Todo: Remove all cameras
-    }
-
-    //Todo: Currently _actualize allows to freeze a sprite even when the _element is changing, print in the other hand
-    // makes sure the sprite is not added multiple times to the print list. Actualize may be useless, consider.
-    // Also make a way to remove the sprite from the printing list.
-    void Sprite::Loop() {
-        if(_actualize){
-            if (std::shared_ptr<Element> spt_parent = _parent.lock()) {
-                _sprite->sprite.setScale(spt_parent->getWorldScale());
-                _sprite->sprite.setRotation(spt_parent->getWorldRotation());
-                _sprite->sprite.setPosition(spt_parent->getWorldPosition());
-                _sprite->depth = (float) spt_parent->getDepth() + (0.0000000001f * (float) _depth);
-            }
+void Sprite::addDepth(int depth)
+{
+    {
+        unsigned int stored = _depth;
+        _depth += depth;
+        if (depth < 0 && _depth > stored)
+        {
+            _depth = 0;
+        }
+        else if (depth > 0 && _depth < stored)
+        {
+            _depth = UINT_MAX;
         }
     }
-}//mate
+}
+
+// Todo: Currently _actualize allows to freeze a sprite even when the _element is changing, print in the other hand
+//  makes sure the sprite is not added multiple times to the print list. Actualize may be useless, consider.
+//  Also make a way to remove the sprite from the printing list.
+void Sprite::loop()
+{
+    if (_actualize)
+    {
+        if (std::shared_ptr<Element> spt_parent = _parent.lock())
+        {
+            _sprite->sprite.setScale(spt_parent->getWorldScale());
+            _sprite->sprite.setRotation(spt_parent->getWorldRotation());
+            _sprite->sprite.setPosition(spt_parent->getWorldPosition());
+            _sprite->depth = (float)spt_parent->getDepth() + (0.0000000001f * (float)_depth);
+        }
+    }
+}
+} // namespace mate
