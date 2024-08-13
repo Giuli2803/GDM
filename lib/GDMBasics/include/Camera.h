@@ -1,9 +1,12 @@
 #include "GDMBasics.h"
+#include "Sprite.h"
 
 #ifndef GDMATEEXAMPLES_CAMERA_H
 #define GDMATEEXAMPLES_CAMERA_H
 namespace mate
 {
+class Sprite;
+
 class Camera : public Component
 {
   public:
@@ -20,7 +23,7 @@ class Camera : public Component
   private:
     sf::View _view;
     std::weak_ptr<Game> _game_manager;
-    std::list<std::weak_ptr<const ord_sprite>> _visible_sprites;
+    std::list<std::weak_ptr<const Sprite>> _visible_sprites;
 
     float _aspect_ratio;
     ScaleType _scale_type = RESCALE;
@@ -50,15 +53,15 @@ class Camera : public Component
         target_id = id;
     }
 
-    void addSprite(const std::weak_ptr<const ord_sprite> &sprite)
+    void addSprite(const std::weak_ptr<const Sprite> &sprite)
     {
         _visible_sprites.push_back(sprite);
     }
 
-    void removeSprite(const std::shared_ptr<const ord_sprite> &sprite)
+    void removeSprite(const std::shared_ptr<const Sprite> &sprite)
     {
         _visible_sprites.remove_if(
-            [&sprite](const std::weak_ptr<const ord_sprite> &weak_sprite) { return weak_sprite.lock() == sprite; });
+            [&sprite](const std::weak_ptr<const Sprite> &weak_sprite) { return weak_sprite.lock() == sprite; });
     }
 
     // Other methods declarations

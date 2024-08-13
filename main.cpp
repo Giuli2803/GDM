@@ -54,7 +54,7 @@ game_instance start()
     auto sptElem0 = mainRoom->addElement();
     //*sprite component
     auto sprite1 = sptElem0->addComponent<mate::Sprite>();
-    camera->addSprite(sprite1->getSprite());
+    camera->addSprite(sprite1);
     sprite1->setColor(sf::Color::Red);
     //*input action component
     auto input1 = sptElem0->addComponent<mate::InputActions>();
@@ -68,26 +68,26 @@ game_instance start()
     shooter->setDimensionOffset(64, 64);
 
     auto child0 = sptElem0->addChild();
-    child0->setDepth(-1);
+    child0->depth = -1;
     child0->setPosition(-20, 0);
     child0->setScale(0.5, 0.5);
-    camera->addSprite((child0->addComponent<mate::Sprite>())->getSprite());
+    camera->addSprite((child0->addComponent<mate::Sprite>()));
 
     auto child1 = sptElem0->addChild();
-    child1->setDepth(-1);
+    child1->depth = -1;
     child1->setPosition(55, 0);
     child1->setScale(0.5, 0.5);
-    camera->addSprite((child1->addComponent<mate::Sprite>())->getSprite());
+    camera->addSprite((child1->addComponent<mate::Sprite>()));
 
     auto sptElem1 = mainRoom->addElement();
     sptElem1->setPosition(0, 0);
     sptElem1->setScale(2, 2);
-    sptElem1->setDepth(-2);
+    sptElem1->depth = -2;
     // Sprite component
     auto sprite2 = sptElem1->addComponent<mate::Sprite>();
     sprite2->setTexture("../Circle.png");
     sprite2->setColor(sf::Color::Magenta);
-    camera2->addSprite(sprite2->getSprite());
+    camera2->addSprite(sprite2);
     // sprite2->setDepth(-10);
     // ColorTrigger
     auto color = std::make_unique<ColorTrigger>(sptElem1);

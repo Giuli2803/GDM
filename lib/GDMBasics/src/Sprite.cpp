@@ -16,17 +16,15 @@ Sprite::Sprite(const std::weak_ptr<Element> &parent) : Component(parent)
 
 void Sprite::addDepth(int depth)
 {
+    unsigned int stored = _sprite->depth;
+    _sprite->depth += depth;
+    if (depth < 0 && _sprite->depth > stored)
     {
-        unsigned int stored = _depth;
-        _depth += depth;
-        if (depth < 0 && _depth > stored)
-        {
-            _depth = 0;
-        }
-        else if (depth > 0 && _depth < stored)
-        {
-            _depth = UINT_MAX;
-        }
+        _sprite->depth = 0;
+    }
+    else if (depth > 0 && _sprite->depth < stored)
+    {
+        _sprite->depth = UINT_MAX;
     }
 }
 
@@ -42,7 +40,6 @@ void Sprite::loop()
             _sprite->sprite.setScale(spt_parent->getWorldScale());
             _sprite->sprite.setRotation(spt_parent->getWorldRotation());
             _sprite->sprite.setPosition(spt_parent->getWorldPosition());
-            _sprite->depth = (float)spt_parent->getDepth() + (0.0000000001f * (float)_depth);
         }
     }
 }

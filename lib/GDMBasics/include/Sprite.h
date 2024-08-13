@@ -18,7 +18,6 @@ class Sprite : public Component
     std::weak_ptr<Game> _game_manager;
 
     bool _actualize = true;
-    unsigned int _depth = 0;
 
   public:
     // Constructor
@@ -36,7 +35,7 @@ class Sprite : public Component
         _sprite->sprite.setColor(color);
     }
 
-    std::shared_ptr<const ord_sprite> getSprite()
+    std::shared_ptr<const ord_sprite> getSprite() const
     {
         return _sprite;
     }
@@ -46,14 +45,23 @@ class Sprite : public Component
         _sprite->sprite.setColor(sf::Color(red, green, blue, alpha));
     }
 
-    [[maybe_unused]] void setDepth(unsigned int depth)
+    [[maybe_unused]] void setSpriteDepth(unsigned int depth)
     {
-        _depth = depth;
+        _sprite->depth = depth;
     }
 
-    [[maybe_unused]] unsigned int getDepth() const
+    [[maybe_unused]] int getElementDepth() const
     {
-        return _depth;
+        if (auto spt_parent = _parent.lock())
+        {
+            return spt_parent->depth;
+        }
+        return INT_MIN;
+    }
+
+    [[maybe_unused]] unsigned int getSpriteDepth() const
+    {
+        return _sprite->depth;
     }
 
     [[maybe_unused]] void doActualize(bool actualize)

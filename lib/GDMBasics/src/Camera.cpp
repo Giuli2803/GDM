@@ -60,17 +60,19 @@ void Camera::renderLoop()
     else
         _spt_game->setWindowView(_view, target_id);
 
-    _visible_sprites.remove_if([](const std::weak_ptr<const ord_sprite> &sprite) { return sprite.expired(); });
+    _visible_sprites.remove_if([](const std::weak_ptr<const Sprite> &sprite) { return sprite.expired(); });
 
-    _visible_sprites.sort([](const std::weak_ptr<const ord_sprite> &a, const std::weak_ptr<const ord_sprite> &b) {
+    _visible_sprites.sort([](const std::weak_ptr<const Sprite> &a, const std::weak_ptr<const Sprite> &b) {
         auto spt_a = a.lock();
         auto spt_b = b.lock();
-        return spt_a->depth < spt_b->depth;
+        int depth_a = spt_a->getElementDepth();
+        int depth_b = spt_b->getElementDepth();
+        return (depth_a < depth_b || (depth_a == depth_b && spt_a->getSpriteDepth() < spt_b->getSpriteDepth()));
     });
 
     for (const auto &sprite : _visible_sprites)
     {
-        _spt_game->draw(sprite.lock(), target_id);
+        _spt_game->draw(sprite.lock()->getSprite(), target_id);
     }
 }
 
