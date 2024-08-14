@@ -25,8 +25,8 @@ class TriggerShooter;
 /// Shapes supported for trigger detection
 enum ShapeType
 {
-    RECTANGLE,
-    CIRCLE
+    RECTANGLE ///< Calculated from the top left corner + height/width
+    ,CIRCLE ///< Calculated from center + radius [max dimension]
     // Todo: TRIANGLE?
 };
 
@@ -287,7 +287,13 @@ class Element : public mate::LocalCoords
     [[maybe_unused]] unsigned long getFullElementsCount();
 };
 
-
+/**
+ * @brief Superposition detection.
+ *
+ * Trigger is an abstract class for superposition detection. Trigger implementations perform an specific action when
+ * a TriggerShooter gets on top of them. Currently Trigger does not support for depth, but are expected to do so in the
+ * near future.
+ */
 class Trigger
 {
   private:
@@ -304,12 +310,17 @@ class Trigger
     }
 
   public:
-    ShapeType shape = RECTANGLE;
+    ShapeType shape = RECTANGLE; ///< Trigger Shape
 
     Trigger() : id(generateId())
     {
         _offset = mate::Bounds();
     }
+    /**
+     * A Trigger can be set to follow an Element.
+     * @param follow Element to follow.
+     * @param must_follow Should the Trigger be destroy when the Element gets removed?
+     */
     explicit Trigger(const std::weak_ptr<Element> &follow, bool must_follow)
         : _follow(follow), id(generateId()), _must_follow(must_follow)
     {
@@ -323,6 +334,9 @@ class Trigger
         return id;
     }
 
+    /**
+     * Marks a Trigger for removal only if it's set to follow an Element that doesn't exist anymore.
+     */
     void checkRemove()
     {
         if (_must_follow && _follow.expired())
@@ -338,38 +352,31 @@ class Trigger
         should_remove = true;
     }
 
-    [[nodiscard]] sf::Vector2f getPosition() const
-    {
-        sf::Vector2f reference(0, 0);
-        if (std::shared_ptr<Element> spt_parent = _follow.lock())
-        {
-            reference = spt_parent->getWorldPosition();
-        }
-        return _offset.getPositionBounds(reference);
-    }
+    /**
+     * Calculates the position using the Element's position to follow and the Trigger offset.
+     */
+    [[nodiscard]] sf::Vector2f getPosition() const;
+    /**
+     * Calculates the dimensions using the Element's dimensions to follow and the Trigger offset.
+     */
+    [[nodiscard]] sf::Vector2f getDimensions() const;
 
-    [[nodiscard]] sf::Vector2f getDimensions() const
-    {
-        sf::Vector2f reference(1, 1);
-        if (std::shared_ptr<Element> spt_parent = _follow.lock())
-        {
-            reference = spt_parent->getWorldScale();
-        }
-        return _offset.getDimensionBounds(reference);
-    }
-
-    void setPositionOffset(float left, float top)
+    [[maybe_unused]] void setPositionOffset(float left, float top)
     {
         _offset.rect_bounds.left = left;
         _offset.rect_bounds.top = top;
     }
 
-    void setDimensionOffset(float width, float height)
+    [[maybe_unused]]void setDimensionOffset(float width, float height)
     {
         _offset.rect_bounds.width = width;
         _offset.rect_bounds.height = height;
     }
 
+    /**
+     * Abstract method. This method's implementations are called when a TriggerShooter gets inside the bounds of
+     * the Trigger instance.
+     */
     virtual void triggerIn() = 0;
 };
 
