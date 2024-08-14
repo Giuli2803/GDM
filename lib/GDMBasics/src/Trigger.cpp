@@ -25,5 +25,4 @@ sf::Vector2f Trigger::getDimensions() const
     return _offset.getDimensionBounds(reference);
 }
 
-
-}
+} // namespace mate
