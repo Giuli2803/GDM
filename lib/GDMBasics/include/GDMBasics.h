@@ -1,5 +1,6 @@
 /**
- * @brief
+ * @brief declaration of Game, Room, Element, Component, Trigger and TriggerManager classes and
+ * ord_sprite and render_target structures.
  * @file
  */
 
@@ -380,6 +381,12 @@ class Trigger
     virtual void triggerIn() = 0;
 };
 
+/**
+ * @brief Trigger superposition calculations.
+ *
+ * TriggerManager keeps track of all active Triggers and performs the calculations for Trigger superposition when a
+ * TriggerShooter requires it.
+ */
 class TriggerManager
 {
   private:
@@ -391,22 +398,19 @@ class TriggerManager
         triggers.push_back(std::move(trig));
     }
 
-    void removeTrigger(int trigger_id)
-    {
-        for (const std::unique_ptr<Trigger> &trigger : triggers)
-        {
-            if (trigger->getID() == trigger_id)
-            {
-                trigger->markForRemoval();
-            }
-        }
-    }
+    void removeTrigger(int trigger_id);
 
+    /**
+     * Removes all Triggers that are marked for removal.
+     */
     void curate()
     {
         triggers.remove_if([](const std::unique_ptr<Trigger> &trigger) { return trigger->shouldRemove(); });
     }
 
+    /**
+     * Checks if the TriggerShooter is within any of the active Triggers.
+     */
     void checkTrigger(ShapeType shape, const TriggerShooter &shooter);
     static bool rectangleToRectangleCheck(sf::Vector2f rect1_pos, sf::Vector2f rect1_dim, sf::Vector2f rect2_pos,
                                           sf::Vector2f rect2_dim);
@@ -416,7 +420,10 @@ class TriggerManager
 };
 
 /**
- * Main game singleton class.
+ * @brief Main game singleton class.
+ *
+ * Game contains all of the Room objects from the game, runs the loop() method of the active one, tracks the window(s)
+ * and keeps the TriggerManager.
  */
 class Game
 {
@@ -438,27 +445,20 @@ class Game
     };
 
   public:
-    ///----------------non-copyable
     Game(Game &other) = delete;
     void operator=(const Game &) = delete;
 
-    ///---------------------------------------------Simple methods----------------------------
+    // Simple methods
 
-    ///-----------------Window related stuff
+    // Window related stuff
     void setWindowView(sf::View view) const
     {
         _main_render_target.target->setView(view);
     }
-    void setWindowView(sf::View view, u_int id) const
-    {
-        for (const auto &target : _secondary_targets)
-        {
-            if (target.id == id)
-            {
-                target.target->setView(view);
-            }
-        }
-    }
+    void setWindowView(sf::View view, u_int id) const;
+    /**
+     * Sets the main window's view to the default view.
+     */
     void setWindowView() const
     {
         _main_render_target.target->setView(_main_render_target.target->getDefaultView());
@@ -472,37 +472,21 @@ class Game
         _main_render_target.target->setSize(sf::Vector2u(x, y));
     }
 
-    void draw(const std::shared_ptr<const ord_sprite> &sprite, u_int id)
-    {
-        if (id == 0)
-        {
-            _main_render_target.target->draw(sprite->sprite);
-        }
-        else
-        {
-            for (const auto &target : _secondary_targets)
-            {
-                target.target->draw(sprite->sprite);
-            }
-        }
-    }
-
-    ///-----------------Render Targets related stuff
-    [[nodiscard]] u_int addSecondaryTarget(sf::View view)
-    {
-        render_target new_target;
-        u_int id = new_target.id;
-        new_target.target = std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 400), "Game: Second Window");
-        new_target.target->setView(view);
-        _secondary_targets.push_back(std::move(new_target));
-        return id;
-    }
-
-    ///-----------------Rooms related stuff
     /**
-     * Creates a shared pointer to store the new room on the room list
-     * @param room Room to be added
+     * Prints a sprite on a selected render target (window).
+     * @param id id value of the render_target to be used.
      */
+    void draw(const std::shared_ptr<const ord_sprite> &sprite, u_int id);
+
+    // Render Targets related stuff
+    /**
+     * Generates a new window with the desired view.
+     * @param view sf::View of the new window.
+     * @return id value of the new window.
+     */
+    [[nodiscard]] u_int addSecondaryTarget(sf::View view);
+
+    // Rooms related stuff
     void addRoom(std::shared_ptr<Room> room)
     {
         _rooms.push_back(std::move(room));
@@ -513,7 +497,7 @@ class Game
         return _active_room;
     }
 
-    ///------------------Trigger related stuff
+    // Trigger related stuff
     void addTrigger(std::unique_ptr<Trigger> trigger)
     {
         _trigger_manager.addTrigger(std::move(trigger));
@@ -527,17 +511,33 @@ class Game
         _trigger_manager.checkTrigger(shape, shooter);
     }
 
-    ///-------------------------------Longer methods declarations-----------------------------
+    // Longer methods declarations
 
-    ///--------------------Singleton getters
+    // Singleton getters
 
     static std::shared_ptr<Game> getGame();
+    /**
+     * Generates a new Game object with the desired parameters only if there isn't an already existing Game.
+     * @param winWidth width of the main game window.
+     * @param winHeight height of the main game window.
+     * @param gameName title to be displayed on the main game window.
+     * @param mainRoom pre-existing main Room.
+     * @return Game object.
+     */
     [[maybe_unused]] static std::shared_ptr<Game> getGame(int winWidth, int winHeight, const std::string &gameName,
                                                           std::shared_ptr<Room> mainRoom);
+    /**
+     * Generates a new Game object with the desired parameters only if there isn't an already existing Game.
+     * @param winWidth width of the main game window.
+     * @param winHeight height of the main game window.
+     * @param gameName title to be displayed on the main game window.
+     * @param roomsList list of pre-existing rooms.
+     * @return Game object.
+     */
     [[maybe_unused]] static std::shared_ptr<Game> getGame(int winWidth, int winHeight, const std::string &gameName,
                                                           std::list<std::shared_ptr<Room>> &roomsList);
 
-    ///-------------------Others
+    // Others
 
     // Todo: Switch rooms by using a unique ID given by the room itself.
     /**
@@ -554,6 +554,11 @@ class Game
 
 using game_instance = std::shared_ptr<Game>;
 
+/**
+ * Implement your game declaration/generation on this function, Then call this function from your main function and call
+ * gameLoop on the return value to start the game.
+ * @return Game object with the desired content.
+ */
 game_instance start();
 } // namespace mate
 

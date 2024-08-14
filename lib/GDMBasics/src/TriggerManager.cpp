@@ -5,6 +5,17 @@
 
 namespace mate
 {
+void TriggerManager::removeTrigger(int trigger_id)
+{
+    for (const std::unique_ptr<Trigger> &trigger : triggers)
+    {
+        if (trigger->getID() == trigger_id)
+        {
+            trigger->markForRemoval();
+        }
+    }
+}
+
 // Todo: Rotated rectangles
 // Todo: Add depth to triggers
 void TriggerManager::checkTrigger(ShapeType shape, const TriggerShooter &shooter)

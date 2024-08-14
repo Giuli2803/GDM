@@ -8,6 +8,17 @@ namespace mate
 {
 std::shared_ptr<Game> Game::_instance = nullptr;
 
+void Game::setWindowView(sf::View view, u_int id) const
+{
+    for (const auto &target : _secondary_targets)
+    {
+        if (target.id == id)
+        {
+            target.target->setView(view);
+        }
+    }
+}
+
 std::shared_ptr<Game> Game::getGame()
 {
     // std::lock_guard<std::mutex> lock(mutex); //Uncomment when I start working with threads, maybe
@@ -52,6 +63,31 @@ std::shared_ptr<Game> Game::getGame(int winWidth, int winHeight, const std::stri
         }
     }
     return _instance;
+}
+
+void Game::draw(const std::shared_ptr<const ord_sprite> &sprite, u_int id)
+{
+    if (id == 0)
+    {
+        _main_render_target.target->draw(sprite->sprite);
+    }
+    else
+    {
+        for (const auto &target : _secondary_targets)
+        {
+            target.target->draw(sprite->sprite);
+        }
+    }
+}
+
+u_int Game::addSecondaryTarget(sf::View view)
+{
+    render_target new_target;
+    u_int id = new_target.id;
+    new_target.target = std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 400), "Game: Second Window");
+    new_target.target->setView(view);
+    _secondary_targets.push_back(std::move(new_target));
+    return id;
 }
 
 [[maybe_unused]] void Game::switchRoom(int position)
