@@ -1,11 +1,11 @@
-//
-// Created by elly_sparky on 01/01/24.
-//
+/**
+ * @brief
+ * @file
+ */
 
 #ifndef GDMATE_GDMBASICS_H
 #define GDMATE_GDMBASICS_H
 
-#include "LocalCoords.h"
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include <iostream>
@@ -13,6 +13,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include "LocalCoords.h"
 
 namespace mate
 {
@@ -21,6 +22,7 @@ class Component;
 class Trigger;
 class TriggerShooter;
 
+/// Shapes supported for trigger detection
 enum ShapeType
 {
     RECTANGLE,
@@ -28,10 +30,19 @@ enum ShapeType
     // Todo: TRIANGLE?
 };
 
+/**
+ * @brief sf::Sprite but with an additional depth value for better ordering
+ *
+ * ord_sprite is a simple structure that adds a depth value to sf::Sprites. This value does not override the
+ * LocalCoords depth value but it enhances it. when printing an sprite on the screen the game will first check the
+ * LocalCoords depth value of the parent Element and then, if two or more Elements share the same depth value, the
+ * ord_sprite depth will be used. If 2 ord_sprite have the same depth and their parent localCoords share the same depth
+ * then the one that was created last is expected stay on top, but this is not ensured.
+ */
 struct ord_sprite
 {
     sf::Sprite sprite;
-    double depth = 0;
+    unsigned int depth = 0;
 
     bool operator<(ord_sprite &a) const
     {
@@ -39,10 +50,13 @@ struct ord_sprite
     }
 };
 
+/**
+ * @brief Struct to asociate a unique ID value to all sf::RenderWindow.
+ * This allows for better tracking of game windows.
+ */
 struct render_target
 {
     // Todo: Use an sf::RenderTarget instead of a _target
-
     // The target contains the dimensions of the window where the  sprites will be printed
     std::unique_ptr<sf::RenderWindow> target{};
     const u_int id;
@@ -59,39 +73,78 @@ struct render_target
     }
 };
 
+/**
+ * @brief Highest authority LocalCoords object.
+ *
+ * A Room works like a "folder" for all the Element objects on a Game, allowing for easy switching between radically
+ * different aspects of the game by simply changing the selected Room. For example different Rooms might represent
+ * different levels, scenes or menu windows, so the Game object can switch between this by simply selecting a different
+ * Room that already contains all the data of the Elements involved.
+ */
 class Room : public mate::LocalCoords
 {
   private:
-    std::list<std::shared_ptr<Element>> _elements;
+    std::list<std::shared_ptr<Element>> _elements; ///< Elements within the Room.
 
   public:
-    /// Simple methods
     // Constructors
     Room() = default;
 
-    // Elements creation / destruction confirmation
+    // Element stuff
     [[maybe_unused]] unsigned long getElementsCount()
     {
         return _elements.size();
     }
-
-    /// Methods declarations
-    // Element stuff
+    /**
+     * @brief Adds a preexisting Element to the Room.
+     *
+     * This allows for an Element to move between Rooms. When doing so, the Element position coordinates must be taken
+     * in account, this responsibility lays on the user.
+     * @param element Element to be added
+     */
     [[maybe_unused]] void addElement(std::shared_ptr<Element> element);
+    /**
+     * @brief Generates a new Element with the Room as it's parent and returns a reference to it.
+     * @return New Element added to the Room.
+     */
     std::shared_ptr<Element> addElement();
 
     // Loops
+
+    /**
+     * @brief Communicates to all the Element objects within the Room that they should run their main loop functions.
+     *
+     * After all the child Element objects have run their main loops, the Element list is purged to effectively
+     * destroy any Element objects that are marked for removal.
+     */
     void dataLoop();
+
+    /**
+     * @brief Communicates to all the contained Element objects to run their respective renderLoop method.
+     */
     void renderLoop();
 
     // Events
+
+    /**
+     * @brief Communicates to all the contained Element objects that a resize event has occur.
+     *
+     * This means that an sf::RenderWindow has changed in size.
+     */
     void resizeEvent();
 };
 
+/**
+ * Verifies if a Component implementation has a constructor that takes as it's only parameter an Element.
+ * @tparam T Class that inherits from Component.
+ */
 template <class T>
 concept valid_component =
     std::is_base_of<Component, T>::value && requires(std::weak_ptr<Element> element) { T{element}; };
 
+/**
+ * @brief Abstract class for the implementation of special Element functionalities.
+ */
 class Component
 {
   public:
@@ -100,30 +153,63 @@ class Component
     }
 
     // Virtual methods
+
+    /**
+     * @brief Main loop method.
+     *
+     * loop() is called every frame for all Components connected to an Element that it's currently active.
+     * Implementations of loop() are expected to perform modifications on the parent Element, or other Component objects
+     * but are not limited to this and can perform modifications on other Element objects and their Component objects.
+     */
     virtual void loop() = 0;
+    /**
+     * @brief Secondary loop method. For visual effects only.
+     *
+     * renderLoop() is called every frame after the loop() method and it's expected to not perform any modifications
+     * on any Element object. Implementations of this method should only perform modifications on visual aspects using
+     * the modifications introduced by loop() as a guide.
+     */
     virtual void renderLoop(){};
+    /**
+     * @brief Special method called when the window changes in size.
+     *
+     * This method is meant for visual's corrections based on window resizing.
+     */
     virtual void windowResizeEvent(){};
 
   protected:
-    std::weak_ptr<Element> _parent;
+    std::weak_ptr<Element> _parent; ///< Element that contains the Component and controls it's destruction.
 };
 
+/**
+ * @brief Main game entity.
+ *
+ * Element works mostly as a low authority implementation of LocalCoords, that is to say, it's expected to have a
+ * parent LocalCoords object, yet Element is not limited to that position and can have global authority too.
+ * What's really important about Element objects is their capability to hold Component objects to clearly
+ * differentiate between Element instances.
+ */
 class Element : public mate::LocalCoords
 {
   private:
     // Shared pointer is used since other components might need to hold a reference, yet this should
     // be the only shared pointer to this particular components and elements, all others should be weak pointers
     // Todo: Find a way to use unique_ptr and references maybe.
+    //  Element->FindComponent->modify template? Only if find isn't costly and can't be confused (It CAN be confused).
     std::vector<std::shared_ptr<Component>> _components;
     std::list<std::shared_ptr<Element>> _elements;
     bool _destroy_flag = false;
 
   public:
-    ///--------------------------- Constructors
-    explicit Element(std::shared_ptr<LocalCoords> parent, sf::Vector2f position)
-        : LocalCoords(position, std::move(parent))
+    // Constructors
+    explicit Element(const std::shared_ptr<LocalCoords>& parent, sf::Vector2f position)
+        : LocalCoords(position, parent)
     {
     }
+    /**
+     * Default constructor is meant for high priority Element objects, if the Element is meant to have a parent on
+     * creation use one of the specific constructors for that.
+     */
     Element() = default;
 
     [[maybe_unused]] unsigned long getElementsCount() const
@@ -132,6 +218,13 @@ class Element : public mate::LocalCoords
     }
 
     // Adds a new Component of the template type to the component list and returns it
+    /**
+     * @brief Generates a new Component.
+     *
+     * The Component is of the specified class and the parent of the Component is set as the calling Element instance.
+     * @tparam T Component implementation that complies with valid_component
+     * @return Reference to the generated Component.
+     */
     template <valid_component T> std::shared_ptr<T> addComponent() noexcept
     {
         auto new_component = std::make_shared<T>(std::dynamic_pointer_cast<Element>(shared_from_this()));
@@ -139,19 +232,61 @@ class Element : public mate::LocalCoords
         return new_component;
     }
 
+    /**
+     * When an Element is set for destruction the effect is not immediate, this is to avoid the destruction to occur
+     * while a code thread within the Element is being executed (Like a sef-destruction Component). shouldDestroy()
+     * allows to now if an Element is going to be destroy less than a frame before the event occurs.
+     * @return true if the Element is marked for destruction.
+     */
     bool shouldDestroy() const
     {
         return _destroy_flag;
     }
 
     // Other methods definitions
+    /**
+     * Generates a new basic Element with the parent set to the calling Element instance.
+     * @return A reference to the new Element.
+     */
     std::shared_ptr<Element> addChild();
+    /**
+     * @brief Marks the Element for destruction.
+     *
+     * All children Element objects will also de marked for destruction. The removal itself can take up to a frame to
+     * be effective, but the loop methods of the Component objects of an Element that's marked for removal are not
+     * expected to be called. Furthermore, if an Element is marked for destruction by a Component of the same Element,
+     * the loop() method will not be called for the rest Component objects, so Component's with this capability are
+     * should be added as the first Component of an Element for efficiency. If an Element mark's it's parent for removal
+     * all other children object's loop() method will be called yet those are expected to run Component and Element
+     * purging only to avoid any possible unintended persistence.
+     */
     void destroy();
+    /**
+     * @brief Main Element loop method.
+     *
+     * The loop() method fo the children Element and Component objects are called. The order is Component first
+     * Elements second, so if an Element mark's itself or one of it's children for destruction there will not be
+     * unnecessary loop() calls performed. If the element is marked for removal it will destroy all of it's child
+     * Element and Component objects.
+     */
     void loop();
+    /**
+     * @brief Secondary loop method, meant for visual changes only.
+     *
+     * renderLoop() does not perform checks for an Element destruction, therefore Element destruction should only be
+     * performed on the loop() methods.
+     */
     void renderLoop();
+    /**
+     * @brief Communicates to all the children and Component that a window has changed in size.
+     */
     void resizeEvent();
+    /**
+     * @return All the related Element under it's authority (children + children's children + etc).
+     */
     [[maybe_unused]] unsigned long getFullElementsCount();
 };
+
 
 class Trigger
 {
@@ -415,8 +550,8 @@ using game_instance = std::shared_ptr<Game>;
 game_instance start();
 } // namespace mate
 
+#include "Sprite.h"
 #include "Camera.h"
 #include "InputActions.h"
-#include "Sprite.h"
 #include "TriggerShooter.h"
 #endif // GDMATE_GDMBASICS_H

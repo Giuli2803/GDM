@@ -10,7 +10,7 @@ std::shared_ptr<Element> Element::addChild()
 {
     auto child = std::make_shared<Element>(shared_from_this(), getPosition());
     _elements.push_back(child);
-    return child;
+    return std::move(child);
 }
 
 void Element::destroy()

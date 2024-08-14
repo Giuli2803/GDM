@@ -15,8 +15,9 @@ namespace mate
 
 std::shared_ptr<Element> Room::addElement()
 {
-    _elements.push_back(std::move(std::make_shared<Element>(shared_from_this(), getPosition())));
-    return _elements.back();
+    auto child_element = std::make_shared<Element>(shared_from_this(), getPosition());
+    _elements.push_back(child_element);
+    return std::move(child_element);
 }
 
 void Room::dataLoop()
