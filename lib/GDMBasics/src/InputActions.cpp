@@ -4,26 +4,28 @@
 
 #include "InputActions.h"
 
-namespace mate {
-    void InputActions::Loop() {
-        for (auto it = _actions.begin(); it != _actions.end();) {
-            if (sf::Keyboard::isKeyPressed(it->key)) {
-                it->action();
-            }
-
-            bool shouldErase = false;
-            if (std::holds_alternative<std::weak_ptr<void>>(it->weakRef)) {
-                auto weakPtr = std::get<std::weak_ptr<void>>(it->weakRef);
-                if (weakPtr.expired()) {
-                    shouldErase = true;
-                }
-            }
-
-            if (shouldErase) {
+namespace mate
+{
+void InputActions::loop()
+{
+    for (auto it = _actions.begin(); it != _actions.end();)
+    {
+        if (std::holds_alternative<std::weak_ptr<void>>(it->object_ref))
+        {
+            auto weakPtr = std::get<std::weak_ptr<void>>(it->object_ref);
+            if (weakPtr.expired())
+            {
                 it = _actions.erase(it);
-            } else {
-                ++it;
+                continue;
             }
         }
+
+        if (sf::Keyboard::isKeyPressed(it->key))
+        {
+            it->action();
+        }
+
+        ++it;
     }
-} //mate
+}
+} // namespace mate

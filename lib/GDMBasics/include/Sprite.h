@@ -1,75 +1,111 @@
-//
-// Created by elly_sparky on 02/01/24.
-//
+/**
+ * @brief Sprite class declaration
+ * @file
+ */
 
 #ifndef GDMATE_SPRITE_H
 #define GDMATE_SPRITE_H
 
-#include <string>
 #include "GDMBasics.h"
+#include <string>
 
-//Todo:
-// * If print
+namespace mate
+{
+/**
+ * @brief Visual component.
+ *
+ * Sprites are just that, the Component holds the image to be displayed on the screen on the coordinates of the
+ * associated Element.
+ */
+class Sprite : public Component
+{
+  private:
+    sf::Texture _texture;
+    std::shared_ptr<ord_sprite> _sprite;
+    std::weak_ptr<Game> _game_manager;
 
+    bool _actualize = true;
 
-namespace mate{
-    class Sprite : public Component {
-    private:
-        sf::Texture _texture;
-        std::shared_ptr<ord_sprite> _sprite;
-        std::weak_ptr<Game> _game_manager;
+  public:
+    // Constructor
+    explicit Sprite(const std::weak_ptr<Element> &parent);
+    ~Sprite() = default;
 
-        bool _actualize = true;
-        unsigned int _depth = 0;
-    public:
-        //Constructor
-        explicit Sprite(const std::weak_ptr<Element>&  parent);
-        ~Sprite();
+    // Simple methods
+    /**
+     * Loads an image from a file and sets it as the displayed image of the Sprite.
+     * @param filename relative path of the file.
+     */
+    void setTexture(const std::string &filename)
+    {
+        _texture.loadFromFile(filename);
+    }
 
-        //Simple methods
-        void setTexture(const std::string &filename){
-            _texture.loadFromFile(filename);
-            ///This might be necessary if the new sprite has a different size, but I'm not sure of that
-            //_sprite.sprite.setTexture(_texture, true);
+    [[maybe_unused]] void setColor(sf::Color color)
+    {
+        _sprite->sprite.setColor(color);
+    }
+
+    /**
+     * Color setter with RGBA values.
+     */
+    [[maybe_unused]] void setColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
+    {
+        _sprite->sprite.setColor(sf::Color(red, green, blue, alpha));
+    }
+
+    std::shared_ptr<const ord_sprite> getSprite() const
+    {
+        return _sprite;
+    }
+
+    /**
+     * Sprite depth comes secondary to the associated Element's depth, this means that the Sprite depth will only be
+     * taken in account when multiple Sprites have the same Element depth.
+     */
+    [[maybe_unused]] void setSpriteDepth(unsigned int depth)
+    {
+        _sprite->depth = depth;
+    }
+
+    /**
+     * @return In case of the associated Element not existing anymore (A problem that shouldn't really occur) the
+     * returned depth will be the minimum possible.
+     */
+    [[maybe_unused]] int getElementDepth() const
+    {
+        if (auto spt_parent = _parent.lock())
+        {
+            return spt_parent->depth;
         }
+        return INT_MIN;
+    }
 
-        [[maybe_unused]]
-        void setColor(sf::Color color){
-            _sprite->sprite.setColor(color);
-        }
+    [[maybe_unused]] unsigned int getSpriteDepth() const
+    {
+        return _sprite->depth;
+    }
 
-        [[maybe_unused]]
-        void setColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha){
-            _sprite->sprite.setColor(sf::Color(red, green, blue, alpha));
-        }
+    /**
+     * @param actualize if false the Sprite will not run it's loop() method until set back to true.
+     */
+    [[maybe_unused]] void doActualize(bool actualize)
+    {
+        _actualize = actualize;
+    }
 
-        [[maybe_unused]]
-        void setDepth(unsigned int depth){
-            _depth = depth;
-        }
+    // Other methods declarations
+    /**
+     * Adds a value to the Sprite's depth. If the result exceeds the valid limits the result will remain at
+     * the corresponding limit.
+     */
+    [[maybe_unused]] void addDepth(int depth);
+    /**
+     * Sprite's loop() actualizes the position, rotation and scale of the printed image following
+     * the associated Element.
+     */
+    void loop() override;
+};
+} // namespace mate
 
-        [[maybe_unused]]
-        void addDepth(int depth){
-            unsigned int stored = _depth;
-            _depth += depth;
-            if(depth < 0 && _depth > stored){
-                _depth = 0;
-            } else if(depth > 0 && _depth < stored){
-                _depth = UINT_MAX;
-            }
-        }
-
-        [[maybe_unused]]
-        unsigned int getDepth() const { return _depth; }
-
-        [[maybe_unused]]
-        void doActualize(bool actualize){
-            _actualize = actualize;
-        }
-
-        //Other methods declarations
-        void Loop() override;
-    };
-}
-
-#endif //GDMATE_SPRITE_H
+#endif // GDMATE_SPRITE_H

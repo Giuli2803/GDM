@@ -1,54 +1,66 @@
-//
-// Created by elly_sparky on 01/08/24.
-//
+/**
+ * @brief TriggerShooter class declaration
+ * @file
+ */
 
 #ifndef GDMATEEXAMPLES_TRIGGERSHOOTER_H
 #define GDMATEEXAMPLES_TRIGGERSHOOTER_H
 
 #include "GDMBasics.h"
 
-namespace mate {
-    class TriggerShooter: public Component {
-    private:
-        std::weak_ptr<Game> _game_manager;
-        mate::Bounds offset = mate::Bounds();
-    public:
-        ShapeType shape = RECTANGLE;
+namespace mate
+{
+/**
+ * @brief Trigger detection Component.
+ *
+ * A TriggerShooter is a Component that detects superposition with Trigger objects. When the superposition occurs the
+ * triggerIn() method of Trigger is called.
+ */
+class TriggerShooter : public Component
+{
+  private:
+    std::weak_ptr<Game> _game_manager;
+    mate::Bounds offset = mate::Bounds();
 
-        //Todo: more constructors
-        explicit TriggerShooter(const std::weak_ptr<Element>& parent) : Component(parent){
-            _game_manager = Game::getGame();
-            // Todo: Bounds full rework
-            offset = mate::Bounds();
-        }
+  public:
+    ShapeType shape = RECTANGLE;
 
-        [[nodiscard]] sf::Vector2f getPosition() const {
-            if (std::shared_ptr<Element> spt_parent = _parent.lock()){
-                return offset.getPositionBounds(spt_parent->getWorldPosition());
-            }
-            return {0, 0};
-        }
+    // Constructors
+    // Todo: more constructors
+    explicit TriggerShooter(const std::weak_ptr<Element> &parent) : Component(parent)
+    {
+        _game_manager = Game::getGame();
+        offset = mate::Bounds();
+    }
 
-        [[nodiscard]] sf::Vector2f getDimensions() const {
-            if (std::shared_ptr<Element> spt_parent = _parent.lock()){
-                return offset.getDimensionBounds(spt_parent->getWorldScale());
-            }
-            return {0, 0};
-        }
+    // Simple methods
+    /**
+     * TriggerShooters will follow their associated Element objects, but a position offset can be added.
+     */
+    [[maybe_unused]] void setPositionOffset(float left, float top)
+    {
+        offset.rect_bounds.left = left;
+        offset.rect_bounds.top = top;
+    }
 
-        void setPositionOffset(float left, float top) {
-            offset.rect_bounds.left = left;
-            offset.rect_bounds.top = top;
-        }
+    /**
+     * TriggerShooters will follow their associated Element objects, but a scale offset can be added.
+     */
+    void setDimensionOffset(float width, float height)
+    {
+        offset.rect_bounds.width = width;
+        offset.rect_bounds.height = height;
+    }
 
-        void setDimensionOffset(float width, float height){
-            offset.rect_bounds.width = width;
-            offset.rect_bounds.height = height;
-        }
+    // Other methods declarations
+    [[nodiscard]] sf::Vector2f getPosition() const;
+    [[nodiscard]] sf::Vector2f getDimensions() const;
+    /**
+     * TriggerShooter loop() method will run the entire Trigger list on TriggerManager to check for any superposition.
+     */
+    void loop() override;
+    // Todo: void ShooterReaction(TriggerType type) = {}; should be called when it activates certain triggers
+};
+} // namespace mate
 
-        void Loop() override;
-        // Todo: void ShooterReaction(TriggerType type) = {}; should be called when it activates certain triggers
-    };
-}
-
-#endif //GDMATEEXAMPLES_TRIGGERSHOOTER_H
+#endif // GDMATEEXAMPLES_TRIGGERSHOOTER_H
