@@ -14,7 +14,7 @@ Sprite::Sprite(const std::weak_ptr<Element> &parent) : Component(parent)
     _game_manager = spt_game;
 }
 
-void Sprite::addDepth(int depth)
+[[maybe_unused]] void Sprite::addDepth(int depth)
 {
     unsigned int stored = _sprite->depth;
     _sprite->depth += depth;
