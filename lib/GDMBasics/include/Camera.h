@@ -1,3 +1,8 @@
+/**
+ * @breif Camera class declaration.
+ * @file
+ */
+
 #include "GDMBasics.h"
 #include "Sprite.h"
 
@@ -7,17 +12,25 @@ namespace mate
 {
 class Sprite;
 
+/**
+ * @brief Component for the control of window's views.
+ *
+ * Camera manages an sf::View object and attaches it to a render_target to display it.
+ */
 class Camera : public Component
 {
   public:
     explicit Camera(const std::weak_ptr<Element> &parent);
     ~Camera();
 
+    /**
+     * How should the view change when the window changes in size.
+     */
     enum ScaleType
     {
-        LETTERBOX,
-        RESCALE,
-        REVEAL
+        LETTERBOX,    ///< Keep the view ratio without stretching objects by adding black lines on the extra space.
+        RESCALE,      ///< Stretch the objects in the view to fit the window space while keeping the ratio.
+        REVEAL        ///< Keep the world objects sizes persistent and show more or less as the window changes in size.
     };
 
   private:
@@ -29,7 +42,7 @@ class Camera : public Component
     ScaleType _scale_type = RESCALE;
 
   public:
-    u_int target_id = 0;
+    u_int target_id = 0; ///< id value of the target (window) to print into.
 
     // Simple methods
     void setSize(float x, float y)
@@ -65,7 +78,13 @@ class Camera : public Component
     }
 
     // Other methods declarations
+    /**
+     * @return View width on pixels / view height on pixels.
+     */
     [[maybe_unused]] float getRatio();
+    /**
+     * Generates a new render_target (window by default) to print the view into.
+     */
     void useNewTarget();
     void loop() override{};
     void renderLoop() override;
