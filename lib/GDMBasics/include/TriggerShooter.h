@@ -1,6 +1,7 @@
-//
-// Created by elly_sparky on 01/08/24.
-//
+/**
+ * @brief TriggerShooter class declaration
+ * @file
+ */
 
 #ifndef GDMATEEXAMPLES_TRIGGERSHOOTER_H
 #define GDMATEEXAMPLES_TRIGGERSHOOTER_H
@@ -9,6 +10,12 @@
 
 namespace mate
 {
+/**
+ * @brief Trigger detection Component.
+ *
+ * A TriggerShooter is a Component that detects superposition with Trigger objects. When the superposition occurs the
+ * triggerIn() method of Trigger is called.
+ */
 class TriggerShooter : public Component
 {
   private:
@@ -27,12 +34,18 @@ class TriggerShooter : public Component
     }
 
     // Simple methods
-    void setPositionOffset(float left, float top)
+    /**
+     * TriggerShooters will follow their associated Element objects, but a position offset can be added.
+     */
+    [[maybe_unused]] void setPositionOffset(float left, float top)
     {
         offset.rect_bounds.left = left;
         offset.rect_bounds.top = top;
     }
 
+    /**
+     * TriggerShooters will follow their associated Element objects, but a scale offset can be added.
+     */
     void setDimensionOffset(float width, float height)
     {
         offset.rect_bounds.width = width;
@@ -42,6 +55,9 @@ class TriggerShooter : public Component
     // Other methods declarations
     [[nodiscard]] sf::Vector2f getPosition() const;
     [[nodiscard]] sf::Vector2f getDimensions() const;
+    /**
+     * TriggerShooter loop() method will run the entire Trigger list on TriggerManager to check for any superposition.
+     */
     void loop() override;
     // Todo: void ShooterReaction(TriggerType type) = {}; should be called when it activates certain triggers
 };
