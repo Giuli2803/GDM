@@ -1,5 +1,5 @@
 /**
- * @breif Declaration of InputActions class.
+ * @brief InputActions class declaration.
  * @file
  */
 

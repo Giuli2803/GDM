@@ -1,5 +1,5 @@
 /**
- * @breif Camera class declaration.
+ * @brief Camera class declaration.
  * @file
  */
 
