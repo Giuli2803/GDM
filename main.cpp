@@ -20,7 +20,7 @@ class ColorTrigger : public Trigger
     std::weak_ptr<Sprite> _sprite;
 
   public:
-    explicit ColorTrigger(const std::weak_ptr<Element> &parent) : Trigger(parent, true)
+    explicit ColorTrigger(const std::shared_ptr<Element> &parent) : Trigger(parent)
     {
     }
 
@@ -44,11 +44,12 @@ game_instance start()
     auto camElem = mainRoom->addElement();
     //*camera component
     auto camera = camElem->addComponent<mate::Camera>();
-    camera->setScaleType(mate::Camera::ScaleType::REVEAL);
+    camera->setScaleType(mate::Camera::ScaleType::RESCALE);
 
     auto camElem2 = mainRoom->addElement();
     //*camera component
     auto camera2 = camElem2->addComponent<mate::Camera>();
+    camera2->setScaleType(mate::Camera::ScaleType::REVEAL);
     camera2->useNewTarget();
 
     auto sptElem0 = mainRoom->addElement();
@@ -74,7 +75,7 @@ game_instance start()
     camera->addSprite((child0->addComponent<mate::Sprite>()));
 
     auto child1 = sptElem0->addChild();
-    child1->depth = -1;
+    child1->depth = -2;
     child1->setPosition(55, 0);
     child1->setScale(0.5, 0.5);
     camera->addSprite((child1->addComponent<mate::Sprite>()));
@@ -87,6 +88,8 @@ game_instance start()
     auto sprite2 = sptElem1->addComponent<mate::Sprite>();
     sprite2->setTexture("../Circle.png");
     sprite2->setColor(sf::Color::Magenta);
+    sprite2->setSpriteDepth(20);
+    camera->addSprite(sprite2);
     camera2->addSprite(sprite2);
     // sprite2->setDepth(-10);
     // ColorTrigger
@@ -95,7 +98,7 @@ game_instance start()
     // color->getID());
     color->addSprite(sprite2);
     color->shape = mate::CIRCLE;
-    color->setDimensionOffset(64, 64);
+    color->setScale(64, 64);
     game->addTrigger(std::move(color));
 
     input1->addInput(sf::Keyboard::W, &mate::Element::destroy, sptElem1);
