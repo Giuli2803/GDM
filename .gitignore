@@ -31,11 +31,15 @@
 *.out
 *.app
 
-# CLion stuff IDK
+# CLion
 /.idea
 /cmake-build-debug
 /cmake-build-release
 /cmake-build-default
+/examples/*/cmake-build-debug
+/examples/*/cmake-build-release
+/examples/*/cmake-build-default
 
 # Build
 /build
+*/build
