@@ -39,7 +39,11 @@ jobs:
       run: cmake --build ${{github.workspace}}/build
 
     - name: Run Unit Tests
-      run: cd ${{github.workspace}}/build/test && ctest --output-on-failure
+      run: |
+        Xvfb :99 -screen 0 1024x768x16 &
+        export DISPLAY=:99
+        cd ${{github.workspace}}/build/tests
+        ctest --output-on-failure
 
     - name: Build Examples
       run: cmake --build ${{github.workspace}}/build --target GDMateExample
