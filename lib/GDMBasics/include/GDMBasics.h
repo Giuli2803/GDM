@@ -271,8 +271,6 @@ class Trigger : public Element
     {
     }
 
-    ~Trigger() = default;
-
     [[nodiscard]] int getID() const
     {
         return id;
@@ -477,12 +475,18 @@ class Game
     [[nodiscard]] u_int addSecondaryTarget(sf::View view);
 
     // Rooms related stuff
-    void addRoom(std::shared_ptr<Room> room)
+    [[maybe_unused]] void addRoom(std::shared_ptr<Room> room)
     {
         _rooms.push_back(std::move(room));
     }
 
-    [[maybe_unused]] std::shared_ptr<Room> getMainRoom()
+    [[maybe_unused]] std::shared_ptr<Room> addRoom(){
+        auto room = std::make_shared<Room>();
+        _rooms.push_back(room);
+        return std::move(room);
+    }
+
+    [[maybe_unused]] std::shared_ptr<Room> getActiveRoom()
     {
         return _active_room;
     }
