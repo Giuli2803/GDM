@@ -24,12 +24,6 @@ add_executable(
         test_Basics.cpp
 )
 
-# Path to libraries folder
-set(LIB_DIR ${CMAKE_SOURCE_DIR}/../lib)
-
-# Add subdirectories to libraries
-add_subdirectory(${LIB_DIR}/GDMBasics ${CMAKE_BINARY_DIR}/lib/GDMBasics)
-
 target_link_libraries(
         ${PROJECT_NAME}
         GDMBasics
