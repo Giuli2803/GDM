@@ -4,9 +4,9 @@ name: CMake
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main", "develop" ]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -32,15 +32,12 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
-    - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+    - name: Build All
+      run: cmake --build ${{github.workspace}}/build
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: |
-        export DISPLAY=:99
-        sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
-        ctest --output-on-failure -C ${{env.BUILD_TYPE}}
+    - name: Run Unit Tests
+      run: cd ${{github.workspace}}/build/tests && ctest --output-on-failure
+
+    - name: Build Examples
+      run: cmake --build ${{github.workspace}}/build --target GDMateExample
+
