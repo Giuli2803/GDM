@@ -26,8 +26,8 @@ void TriggerManager::checkTrigger(ShapeType shape, const TriggerShooter &shooter
 
     for (const std::unique_ptr<Trigger> &trigger : triggers)
     {
-        sf::Vector2 trig_position = trigger->getPosition();
-        sf::Vector2 trig_dimensions = trigger->getDimensions();
+        sf::Vector2 trig_position = trigger->getWorldPosition();
+        sf::Vector2 trig_dimensions = trigger->getWorldScale();
 
         switch (trigger->shape)
         {
@@ -76,8 +76,6 @@ void TriggerManager::checkTrigger(ShapeType shape, const TriggerShooter &shooter
             }
             break;
         }
-
-        trigger->checkRemove();
     }
 }
 

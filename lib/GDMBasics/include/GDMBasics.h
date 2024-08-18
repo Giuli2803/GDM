@@ -22,6 +22,7 @@ class Element;
 class Component;
 class Trigger;
 class TriggerShooter;
+class TriggerManager;
 
 /// Shapes supported for trigger detection
 enum ShapeType
@@ -72,67 +73,6 @@ struct render_target
         static int unique_id = 0;
         return unique_id++;
     }
-};
-
-/**
- * @brief Highest authority LocalCoords object.
- *
- * A Room works like a "folder" for all the Element objects on a Game, allowing for easy switching between radically
- * different aspects of the game by simply changing the selected Room. For example different Rooms might represent
- * different levels, scenes or menu windows, so the Game object can switch between this by simply selecting a different
- * Room that already contains all the data of the Elements involved.
- */
-class Room : public mate::LocalCoords
-{
-  private:
-    std::list<std::shared_ptr<Element>> _elements; ///< Elements within the Room.
-
-  public:
-    // Constructors
-    Room() = default;
-
-    // Element stuff
-    [[maybe_unused]] unsigned long getElementsCount()
-    {
-        return _elements.size();
-    }
-    /**
-     * @brief Adds a preexisting Element to the Room.
-     *
-     * This allows for an Element to move between Rooms. When doing so, the Element position coordinates must be taken
-     * in account, this responsibility lays on the user.
-     * @param element Element to be added
-     */
-    [[maybe_unused]] void addElement(std::shared_ptr<Element> element);
-    /**
-     * @brief Generates a new Element with the Room as it's parent and returns a reference to it.
-     * @return New Element added to the Room.
-     */
-    std::shared_ptr<Element> addElement();
-
-    // Loops
-
-    /**
-     * @brief Communicates to all the Element objects within the Room that they should run their main loop functions.
-     *
-     * After all the child Element objects have run their main loops, the Element list is purged to effectively
-     * destroy any Element objects that are marked for removal.
-     */
-    void dataLoop();
-
-    /**
-     * @brief Communicates to all the contained Element objects to run their respective renderLoop method.
-     */
-    void renderLoop();
-
-    // Events
-
-    /**
-     * @brief Communicates to all the contained Element objects that a resize event has occur.
-     *
-     * This means that an sf::RenderWindow has changed in size.
-     */
-    void resizeEvent();
 };
 
 /**
@@ -203,6 +143,11 @@ class Element : public mate::LocalCoords
 
   public:
     // Constructors
+    explicit Element(const std::shared_ptr<LocalCoords>& parent)
+        : LocalCoords(parent)
+    {
+    }
+
     explicit Element(const std::shared_ptr<LocalCoords>& parent, sf::Vector2f position)
         : LocalCoords(position, parent)
     {
@@ -286,7 +231,10 @@ class Element : public mate::LocalCoords
      * @return All the related Element under it's authority (children + children's children + etc).
      */
     [[maybe_unused]] unsigned long getFullElementsCount();
+
+
 };
+
 
 /**
  * @brief Superposition detection.
@@ -295,13 +243,10 @@ class Element : public mate::LocalCoords
  * a TriggerShooter gets on top of them. Currently Trigger does not support for depth, but are expected to do so in the
  * near future.
  */
-class Trigger
+class Trigger : public Element
 {
   private:
-    mate::Bounds _offset = mate::Bounds();
-    const std::weak_ptr<Element> _follow;
     const int id;
-    bool _must_follow = false;
     bool should_remove = false;
 
     static int generateId()
@@ -315,17 +260,15 @@ class Trigger
 
     Trigger() : id(generateId())
     {
-        _offset = mate::Bounds();
     }
     /**
      * A Trigger can be set to follow an Element.
      * @param follow Element to follow.
      * @param must_follow Should the Trigger be destroy when the Element gets removed?
      */
-    explicit Trigger(const std::weak_ptr<Element> &follow, bool must_follow)
-        : _follow(follow), id(generateId()), _must_follow(must_follow)
+    explicit Trigger(const std::shared_ptr<LocalCoords> &parent)
+        : Element(parent), id(generateId())
     {
-        _offset = mate::Bounds();
     }
 
     ~Trigger() = default;
@@ -335,15 +278,6 @@ class Trigger
         return id;
     }
 
-    /**
-     * Marks a Trigger for removal only if it's set to follow an Element that doesn't exist anymore.
-     */
-    void checkRemove()
-    {
-        if (_must_follow && _follow.expired())
-            should_remove = true;
-    };
-
     [[nodiscard]] bool shouldRemove() const
     {
         return should_remove;
@@ -351,27 +285,6 @@ class Trigger
     void markForRemoval()
     {
         should_remove = true;
-    }
-
-    /**
-     * Calculates the position using the Element's position to follow and the Trigger offset.
-     */
-    [[nodiscard]] sf::Vector2f getPosition() const;
-    /**
-     * Calculates the dimensions using the Element's dimensions to follow and the Trigger offset.
-     */
-    [[nodiscard]] sf::Vector2f getDimensions() const;
-
-    [[maybe_unused]] void setPositionOffset(float left, float top)
-    {
-        _offset.rect_bounds.left = left;
-        _offset.rect_bounds.top = top;
-    }
-
-    [[maybe_unused]]void setDimensionOffset(float width, float height)
-    {
-        _offset.rect_bounds.width = width;
-        _offset.rect_bounds.height = height;
     }
 
     /**
@@ -420,6 +333,84 @@ class TriggerManager
 };
 
 /**
+ * @brief Highest authority LocalCoords object.
+ *
+ * A Room works like a "folder" for all the Element objects on a Game, allowing for easy switching between radically
+ * different aspects of the game by simply changing the selected Room. For example different Rooms might represent
+ * different levels, scenes or menu windows, so the Game object can switch between this by simply selecting a different
+ * Room that already contains all the data of the Elements involved.
+ */
+class Room : public mate::LocalCoords
+{
+  private:
+    std::list<std::shared_ptr<Element>> _elements; ///< Elements within the Room.
+    TriggerManager _triggers;
+
+  public:
+    // Constructors
+    Room() = default;
+
+    // Element stuff
+    [[maybe_unused]] unsigned long getElementsCount()
+    {
+        return _elements.size();
+    }
+    /**
+     * @brief Adds a preexisting Element to the Room.
+     *
+     * This allows for an Element to move between Rooms. When doing so, the Element position coordinates must be taken
+     * in account, this responsibility lays on the user.
+     * @param element Element to be added
+     */
+    [[maybe_unused]] void addElement(std::shared_ptr<Element> element);
+    /**
+     * @brief Generates a new Element with the Room as it's parent and returns a reference to it.
+     * @return New Element added to the Room.
+     */
+    std::shared_ptr<Element> addElement();
+
+    void addTrigger(std::unique_ptr<Trigger> trigger){
+        _triggers.addTrigger(std::move(trigger));
+    }
+
+    void removeTrigger(int trigger_id){
+        _triggers.removeTrigger(trigger_id);
+    }
+
+    void checkTrigger(ShapeType shape, const TriggerShooter &shooter){
+        _triggers.checkTrigger(shape, shooter);
+    }
+
+    void curateTriggers(){
+        _triggers.curate();
+    }
+
+    // Loops
+
+    /**
+     * @brief Communicates to all the Element objects within the Room that they should run their main loop functions.
+     *
+     * After all the child Element objects have run their main loops, the Element list is purged to effectively
+     * destroy any Element objects that are marked for removal.
+     */
+    void dataLoop();
+
+    /**
+     * @brief Communicates to all the contained Element objects to run their respective renderLoop method.
+     */
+    void renderLoop();
+
+    // Events
+
+    /**
+     * @brief Communicates to all the contained Element objects that a resize event has occur.
+     *
+     * This means that an sf::RenderWindow has changed in size.
+     */
+    void resizeEvent();
+};
+
+/**
  * @brief Main game singleton class.
  *
  * Game contains all of the Room objects from the game, runs the loop() method of the active one, tracks the window(s)
@@ -432,7 +423,6 @@ class Game
     std::shared_ptr<Room> _active_room;
     render_target _main_render_target;
     std::list<render_target> _secondary_targets;
-    TriggerManager _trigger_manager;
     static std::shared_ptr<Game> _instance;
 
     /**
@@ -500,15 +490,15 @@ class Game
     // Trigger related stuff
     void addTrigger(std::unique_ptr<Trigger> trigger)
     {
-        _trigger_manager.addTrigger(std::move(trigger));
+        _active_room->addTrigger(std::move(trigger));
     }
     void removeTrigger(int trigger_id)
     {
-        _trigger_manager.removeTrigger(trigger_id);
+        _active_room->removeTrigger(trigger_id);
     }
     void checkTrigger(ShapeType shape, const TriggerShooter &shooter)
     {
-        _trigger_manager.checkTrigger(shape, shooter);
+        _active_room->checkTrigger(shape, shooter);
     }
 
     // Longer methods declarations

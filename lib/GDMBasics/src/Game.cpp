@@ -121,7 +121,7 @@ u_int Game::addSecondaryTarget(sf::View view)
             }
         }
 
-        _trigger_manager.curate();
+        _active_room->curateTriggers();
 
         // Todo: Data loop
         _active_room->dataLoop();
