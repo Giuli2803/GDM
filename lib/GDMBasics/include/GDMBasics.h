@@ -443,7 +443,7 @@ class Game
     {
         _main_render_target.target->setView(view);
     }
-    void setWindowView(sf::View view, u_int id) const;
+    void setWindowView(sf::View view_, u_int id_) const;
     /**
      * Sets the main window's view to the default view.
      */
@@ -462,17 +462,17 @@ class Game
 
     /**
      * Prints a sprite on a selected render target (window).
-     * @param id id value of the render_target to be used.
+     * @param id_ id value of the render_target to be used.
      */
-    void draw(const std::shared_ptr<const ord_sprite> &sprite, u_int id);
+    void draw(const std::shared_ptr<const ord_sprite> &sprite_, u_int id_);
 
     // Render Targets related stuff
     /**
      * Generates a new window with the desired view.
-     * @param view sf::View of the new window.
+     * @param view_ sf::View of the new window.
      * @return id value of the new window.
      */
-    [[nodiscard]] u_int addSecondaryTarget(sf::View view);
+    [[nodiscard]] u_int addSecondaryTarget(sf::View view_);
 
     // Rooms related stuff
     [[maybe_unused]] void addRoom(std::shared_ptr<Room> room)
@@ -512,38 +512,40 @@ class Game
     static std::shared_ptr<Game> getGame();
     /**
      * Generates a new Game object with the desired parameters only if there isn't an already existing Game.
-     * @param winWidth width of the main game window.
-     * @param winHeight height of the main game window.
-     * @param gameName title to be displayed on the main game window.
-     * @param mainRoom pre-existing main Room.
+     * @param win_width_ width of the main game window.
+     * @param win_height_ height of the main game window.
+     * @param game_name_ title to be displayed on the main game window.
+     * @param main_room_ pre-existing main Room.
      * @return Game object.
      */
-    [[maybe_unused]] static std::shared_ptr<Game> getGame(int winWidth, int winHeight, const std::string &gameName,
-                                                          std::shared_ptr<Room> mainRoom);
+    [[maybe_unused]] static std::shared_ptr<Game> getGame(int win_width_, int win_height_, const std::string &game_name_,
+                                                          std::shared_ptr<Room> main_room_);
     /**
      * Generates a new Game object with the desired parameters only if there isn't an already existing Game.
-     * @param winWidth width of the main game window.
-     * @param winHeight height of the main game window.
-     * @param gameName title to be displayed on the main game window.
-     * @param roomsList list of pre-existing rooms.
+     * @param win_width_ width of the main game window.
+     * @param win_height_ height of the main game window.
+     * @param game_name_ title to be displayed on the main game window.
+     * @param rooms_list_ list of pre-existing rooms.
      * @return Game object.
      */
-    [[maybe_unused]] static std::shared_ptr<Game> getGame(int winWidth, int winHeight, const std::string &gameName,
-                                                          std::list<std::shared_ptr<Room>> &roomsList);
+    [[maybe_unused]] static std::shared_ptr<Game> getGame(int win_width_, int win_height_, const std::string &game_name_,
+                                                          std::list<std::shared_ptr<Room>> &rooms_list_);
 
     // Others
 
     // Todo: Switch rooms by using a unique ID given by the room itself.
     /**
      * Switch the active room
-     * @param position of the desired room on the game rooms list
+     * @param position_ of the desired room on the game rooms list
      */
-    void switchRoom(int position);
+    void switchRoom(int position_);
 
     /**
      * Main game loop
      */
-    [[noreturn]] void gameLoop(bool isTesting = false);
+    [[noreturn]] void gameLoop();
+
+    void run_single_frame();
 };
 
 using game_instance = std::shared_ptr<Game>;
