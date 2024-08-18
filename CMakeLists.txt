@@ -4,4 +4,4 @@ project(GDMBuildAll)
 
 add_subdirectory(lib)
 add_subdirectory(examples)
-add_subdirectory(test)
+add_subdirectory(tests)
