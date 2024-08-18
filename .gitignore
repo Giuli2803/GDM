@@ -36,9 +36,9 @@
 /cmake-build-debug
 /cmake-build-release
 /cmake-build-default
-/examples/*/cmake-build-debug
-/examples/*/cmake-build-release
-/examples/*/cmake-build-default
+*cmake-build-debug
+*cmake-build-release
+*cmake-build-default
 
 # Build
 /build
