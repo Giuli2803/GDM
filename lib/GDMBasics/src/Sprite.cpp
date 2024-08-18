@@ -8,7 +8,7 @@ namespace mate
 Sprite::Sprite(const std::weak_ptr<Element> &parent) : Component(parent)
 {
     _sprite = std::make_shared<ord_sprite>();
-    _texture.loadFromFile("../Square.png");
+    //_texture.loadFromFile("../Square.png");
     _sprite->sprite.setTexture(_texture, true);
     auto spt_game = Game::getGame();
     _game_manager = spt_game;
