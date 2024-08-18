@@ -24,6 +24,9 @@ jobs:
       if: runner.os == 'Linux'
       run: sudo apt-get update && sudo apt-get install libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev
 
+    - name: Install SFML
+      run: sudo apt-get install -y libsfml-dev
+
     - name: Checkout
       uses: actions/checkout@v4
 
@@ -36,7 +39,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build
 
     - name: Run Unit Tests
-      run: cd ${{github.workspace}}/build/tests && ctest --output-on-failure
+      run: cd ${{github.workspace}}/build/test && ctest --output-on-failure
 
     - name: Build Examples
       run: cmake --build ${{github.workspace}}/build --target GDMateExample
