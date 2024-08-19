@@ -27,6 +27,9 @@ jobs:
       - name: Install SFML
         run: sudo apt-get install -y libsfml-dev
 
+      - name: Install gcovr
+        run: sudo apt-get install gcovr
+
       - name: Checkout
         uses: actions/checkout@v4
 
