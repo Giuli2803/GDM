@@ -62,10 +62,13 @@ jobs:
           hide_branch_rate: false
           hide_complexity: true
           indicators: true
-          output: file
+          output: both
           thresholds: '50 75'
 
-      - name: Coverage Badge
-        uses: mikeal/publish-to-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit Coverage Report
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add code-coverage-results.md
+          git commit -m "Add coverage report"
+          git push
