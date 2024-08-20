@@ -49,9 +49,6 @@ jobs:
           cd ${{github.workspace}}/build/tests
           ctest --output-on-failure -C ${{env.BUILD_TYPE}}
 
-      - name: Build Examples
-        run: cmake --build ${{github.workspace}}/build --target GDMateExample
-
       - name: Generate Coverage Report
         run: gcovr -r . --exclude-unreachable-branches --filter='lib/' --xml-pretty -o coverage.xml
 
@@ -61,3 +58,4 @@ jobs:
           files: ./coverage.xml
           flags: unittests
           name: codecov-umbrella
+          token: ${{ secrets.CODECOV_TOKEN }}
