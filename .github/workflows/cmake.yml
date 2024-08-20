@@ -66,9 +66,11 @@ jobs:
           thresholds: '50 75'
 
       - name: Commit Coverage Report
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
           git add code-coverage-results.md
           git commit -m "Add coverage report"
-          git push
+          git push https://${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
