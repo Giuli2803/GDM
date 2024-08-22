@@ -39,6 +39,7 @@ class Sprite : public Component
     void setTexture(const std::string &filename)
     {
         _texture.loadFromFile(filename);
+        _sprite->sprite.setTexture(_texture, true);
     }
 
     [[maybe_unused]] void setColor(sf::Color color)
