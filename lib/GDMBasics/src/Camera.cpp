@@ -55,11 +55,6 @@ void Camera::renderLoop()
         _view.setRotation(spt_parent->getWorldRotation());
     }
 
-    if (target_id == 0)
-        _spt_game->setWindowView(_view);
-    else
-        _spt_game->setWindowView(_view, target_id);
-
     _visible_sprites.remove_if([](const std::weak_ptr<const Sprite> &sprite) { return sprite.expired(); });
 
     _visible_sprites.sort([](const std::weak_ptr<const Sprite> &a, const std::weak_ptr<const Sprite> &b) {
@@ -74,6 +69,8 @@ void Camera::renderLoop()
     {
         _spt_game->draw(sprite.lock()->getSprite(), target_id);
     }
+
+    _spt_game->setWindowView(_view, target_id);
 }
 
 void Camera::windowResizeEvent()

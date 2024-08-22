@@ -10,11 +10,16 @@ std::shared_ptr<Game> Game::_instance = nullptr;
 
 void Game::setWindowView(sf::View view_, u_int id_) const
 {
+    if(id_ == 0){
+        _main_render_target.target->setView(view_);
+        return;
+    }
     for (const auto &target : _secondary_targets)
     {
         if (target.id == id_)
         {
             target.target->setView(view_);
+            return;
         }
     }
 }
@@ -147,7 +152,5 @@ void Game::run_single_frame()
         target.target->display();
     }
     _main_render_target.target->display();
-
-    // Todo: Secondary targets
 }
 } // namespace mate

@@ -439,10 +439,6 @@ class Game
     // Simple methods
 
     // Window related stuff
-    void setWindowView(sf::View view) const
-    {
-        _main_render_target.target->setView(view);
-    }
     void setWindowView(sf::View view_, u_int id_) const;
     /**
      * Sets the main window's view to the default view.
@@ -465,6 +461,8 @@ class Game
      * @param id_ id value of the render_target to be used.
      */
     void draw(const std::shared_ptr<const ord_sprite> &sprite_, u_int id_);
+
+    void display(uint id_) const;
 
     // Render Targets related stuff
     /**
