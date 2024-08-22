@@ -33,12 +33,13 @@ float Camera::getRatio()
     return _aspect_ratio;
 }
 
-void Camera::useNewTarget()
+unsigned int Camera::useNewTarget()
 {
     if (auto _spt_game = _game_manager.lock())
     {
         target_id = _spt_game->addSecondaryTarget(_view);
     }
+    return target_id;
 }
 
 void Camera::renderLoop()
@@ -85,11 +86,11 @@ void Camera::windowResizeEvent()
     case RESCALE:
         break;
     case REVEAL:
-        _view.setSize((float)_spt_game->getWindowSize().x, (float)_spt_game->getWindowSize().y);
+        _view.setSize((float)_spt_game->getWindowSize(target_id).x, (float)_spt_game->getWindowSize(target_id).y);
         break;
     case LETTERBOX:
-        float m_window_width = (float)_spt_game->getWindowSize().x;
-        float m_window_height = (float)_spt_game->getWindowSize().y;
+        float m_window_width = (float)_spt_game->getWindowSize(target_id).x;
+        float m_window_height = (float)_spt_game->getWindowSize(target_id).y;
         float new_width = _aspect_ratio * m_window_height;
         float new_height = m_window_width / _aspect_ratio;
         float offset_width = (m_window_width - new_width) / 2.0f;

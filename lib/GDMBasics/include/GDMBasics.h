@@ -447,22 +447,17 @@ class Game
     {
         _main_render_target.target->setView(_main_render_target.target->getDefaultView());
     }
-    [[nodiscard]] sf::Vector2u getWindowSize() const
-    {
-        return _main_render_target.target->getSize();
-    }
-    void setWindowSize(int x, int y) const
-    {
-        _main_render_target.target->setSize(sf::Vector2u(x, y));
-    }
+
+    [[nodiscard]] sf::Vector2i getWindowPosition(uint id_ = 0) const;
+    void setWindowPosition(int x, int y, uint id_ = 0) const;
+    [[nodiscard]] sf::Vector2u getWindowSize(uint id_ = 0) const;
+    void setWindowSize(int x, int y, uint id_ = 0) const;
 
     /**
      * Prints a sprite on a selected render target (window).
      * @param id_ id value of the render_target to be used.
      */
     void draw(const std::shared_ptr<const ord_sprite> &sprite_, u_int id_);
-
-    void display(uint id_) const;
 
     // Render Targets related stuff
     /**

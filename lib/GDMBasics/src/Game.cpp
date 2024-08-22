@@ -24,6 +24,72 @@ void Game::setWindowView(sf::View view_, u_int id_) const
     }
 }
 
+sf::Vector2i Game::getWindowPosition(uint id_) const
+{
+    if (id_ == 0)
+    {
+        return _main_render_target.target->getPosition();
+    }
+    for (const auto &target : _secondary_targets)
+    {
+        if (target.id == id_)
+        {
+            return target.target->getPosition();
+        }
+    }
+    return {0, 0};
+}
+
+void Game::setWindowPosition(int x, int y, uint id_) const
+{
+    if (id_ == 0)
+    {
+        _main_render_target.target->setPosition(sf::Vector2i (x, y));
+        return;
+    }
+    for (const auto &target : _secondary_targets)
+    {
+        if (target.id == id_)
+        {
+            target.target->setPosition(sf::Vector2i (x, y));
+            return;
+        }
+    }
+}
+
+sf::Vector2u Game::getWindowSize(uint id_) const
+{
+    if (id_ == 0)
+    {
+        return _main_render_target.target->getSize();
+    }
+    for (const auto &target : _secondary_targets)
+    {
+        if (target.id == id_)
+        {
+            return target.target->getSize();
+        }
+    }
+    return {0, 0};
+}
+
+void Game::setWindowSize(int x, int y, uint id_) const
+{
+    if (id_ == 0)
+    {
+        _main_render_target.target->setSize(sf::Vector2u(x, y));
+        return;
+    }
+    for (const auto &target : _secondary_targets)
+    {
+        if (target.id == id_)
+        {
+            target.target->setSize(sf::Vector2u (x, y));
+            return;
+        }
+    }
+}
+
 std::shared_ptr<Game> Game::getGame()
 {
     // std::lock_guard<std::mutex> lock(mutex); //Uncomment when I start working with threads, maybe
