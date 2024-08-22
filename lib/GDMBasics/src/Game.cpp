@@ -57,7 +57,7 @@ std::shared_ptr<Game> Game::getGame(int win_width_, int win_height_, const std::
     }
     _instance->_main_render_target.target->setSize(sf::Vector2u(win_width_, win_height_));
     _instance->_main_render_target.target->setTitle(game_name_);
-    _instance->_rooms = rooms_list_;
+    _instance->_rooms.merge(rooms_list_);
     if (!rooms_list_.empty())
     {
         _instance->_active_room = rooms_list_.front();
@@ -100,7 +100,7 @@ u_int Game::addSecondaryTarget(sf::View view_)
     }
 }
 
-void Game::gameLoop()
+[[noreturn]] void Game::gameLoop()
 {
     _main_render_target.target->setFramerateLimit(60);
     do

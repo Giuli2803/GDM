@@ -28,6 +28,15 @@ TEST(BasicsTest, RoomSwitching) {
 TEST(BasicsTest, GameSingleton) {
     std::shared_ptr<mate::Game> game = mate::Game::getGame();
     ASSERT_EQ(game, mate::Game::getGame());
+
+    auto game_b = mate::Game::getGame(400, 400, "", std::move(std::make_shared<mate::Room>()));
+    ASSERT_EQ(game_b, game);
+
+    std::list<std::shared_ptr<mate::Room>> rooms;
+    rooms.push_back(std::move(std::make_shared<mate::Room>()));
+    auto game_c = mate::Game::getGame(400, 400, "", rooms);
+    ASSERT_EQ(game, game_c);
+    ASSERT_EQ(game_b, game_c);
 }
 
 TEST(BasicsTest, WindowSize) {
