@@ -63,7 +63,7 @@ TEST(BasicsTest, TopElementCreationAndDestruction){
 
     //Assert if the element was properly destroyed
     test_element->destroy();
-    game->run_single_frame();
+    game->runSingleFrame();
     EXPECT_EQ(main_room->getElementsCount(), 0);
 }
 
@@ -87,7 +87,7 @@ TEST(BasicsTest, ChildElementCreationAndDestruction){
     ASSERT_EQ(parent_element->getFullElementsCount(), 3);
 
     child_element->destroy();
-    game->run_single_frame();
+    game->runSingleFrame();
 
     ASSERT_EQ(parent_element->getElementsCount(), 1);
     ASSERT_EQ(parent_element->getFullElementsCount(), 1);

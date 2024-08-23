@@ -176,12 +176,12 @@ u_int Game::addSecondaryTarget(sf::View view_)
     _main_render_target.target->setFramerateLimit(60);
     do
     {
-        run_single_frame();
+        runSingleFrame();
     } while (_main_render_target.target->isOpen());
     exit(0);
 }
 
-void Game::run_single_frame()
+void Game::runSingleFrame()
 {
     // Event Pooling
     sf::Event event{};
@@ -198,6 +198,25 @@ void Game::run_single_frame()
             break;
         }
     }
+    for (const auto &target : _secondary_targets)
+    {
+        sf::Event event{};
+        while (target.target->pollEvent(event))
+        {
+            switch (event.type)
+            {
+            case sf::Event::Closed:
+                target.target->setVisible(false);
+            case sf::Event::Resized:
+                _active_room->resizeEvent();
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    // Second targets windows events
 
     _active_room->curateTriggers();
 

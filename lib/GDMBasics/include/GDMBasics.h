@@ -538,7 +538,7 @@ class Game
      */
     [[noreturn]] void gameLoop();
 
-    void run_single_frame();
+    void runSingleFrame();
 };
 
 using game_instance = std::shared_ptr<Game>;
