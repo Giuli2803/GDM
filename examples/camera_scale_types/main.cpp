@@ -1,4 +1,5 @@
 #include "GDMBasics.h"
+#include <random>
 
 int main()
 {
@@ -10,137 +11,95 @@ namespace mate
 {
 game_instance start()
 {
+    /*
+     * The following it's an example of how the different scale type configurations of a camera work. You can build and
+     * execute this example to see how each camera reacts to its window being rescaled. Comments are meant to gide you
+     * into understanding how this is achieved, but you are expected to have already learned the basics of GDMBasics, if
+     * you don't we recommend reading the comments on example_template folder's main.cpp file.
+     */
     auto main_room = std::make_shared<Room>();
     auto game = Game::getGame(480, 360, "My Game Main Window - Rescale Mode", main_room);
 
+     /*
+      * We start by creating an element that will hold owr cameras.
+      * Usually you'll probably want a different element for each camera, but for this example this will suffice.
+      */
     auto my_camera_element = main_room->addElement();
 
+     /* First, a RESCALE camera is one that will modify its aspect ratio when it's window is resized by stretching
+      * everything that the camera can see, keeping the information on screen constant but deforming the player
+      * perception of things in the world.
+      */
     auto my_rescale_camera = my_camera_element->addComponent<Camera>();
     my_rescale_camera->setScaleType(Camera::RESCALE);
     game->setWindowSize(400, 400);
     game->setWindowPosition(500, 50);
 
+     /* Secondly a REVEAL camera modifies its aspect ratio to match that of the window by showing more or less parts
+      * of the game world. This allows to keep the form of the world objects but also reveals extra information
+      * to players with bigger windows.
+      */
     auto my_reveal_camera = my_camera_element->addComponent<Camera>();
+     /* NOTE: we create a different window for the second and third cameras for a better visualization, but multiple
+      * cameras on a single window is actually possible even with cameras with different scale types.
+      */
     uint second_window_id = my_reveal_camera->useNewTarget("My Game Second Window - Reveal Mode");
     my_reveal_camera->setScaleType(Camera::REVEAL);
     game->setWindowSize(400, 400, second_window_id);
     game->setWindowPosition(0, 50, second_window_id);
 
+    /*
+     * Lastly a Letterbox camera keeps its aspect ratio constant (unless "Camera::setSize" it's called) by adding black
+     * lines on the extra space on the window. This will keep both the form of the world and the information on screen
+     * constant for all players.
+     */
     auto my_letterbox_camera = my_camera_element->addComponent<Camera>();
     uint third_window_id = my_letterbox_camera->useNewTarget("My Game Third Window - Letterbox Mode");
     my_letterbox_camera->setScaleType(Camera::LETTERBOX);
     game->setWindowSize(400, 400, third_window_id);
     game->setWindowPosition(1000, 50, third_window_id);
 
+    /*
+     * Now we will just generate some sprites so you can better appreciate the workings of the different cameras.
+     */
     auto my_sprite_element = main_room->addElement();
-    auto my_sprite = my_sprite_element->addComponent<Sprite>();
-    my_sprite->setTexture("resources/Circle.png");
-    my_rescale_camera->addSprite(my_sprite);
-    my_reveal_camera->addSprite(my_sprite);
-    my_letterbox_camera->addSprite(my_sprite);
+    for (int i = -5; i < 5; i++){
+        for (int j = -5; j < 5; j++){
+            /*
+             * Most of this sprites will be out of screen for all our windows. The REVEAL camera will be the only one
+             * able to show all the circles on the window if you resize it enough. All the others will only show the
+             * same amount no matter what you do to the window.
+             */
+            auto my_sprite = my_sprite_element->addComponent<Sprite>();
+            my_sprite->setTexture("resources/Circle.png");
+            my_sprite->setColor(random(), random(), random(), 255);
+            my_sprite->offset.rect_bounds.left = (float) i*150 - 30;
+            my_sprite->offset.rect_bounds.top = (float) j*150 - 30;
+            // We have to add the sprites to the cameras, so they are visible on all of them.
+            // You can try commenting one of these lines to see how you can hide sprites to certain cameras.
+            my_rescale_camera->addSprite(my_sprite);
+            my_reveal_camera->addSprite(my_sprite);
+            my_letterbox_camera->addSprite(my_sprite);
+        }
+    }
 
+    /*
+     * And we will also add a nice green background, so you can appreciate the black lines that the LETTERBOX camera
+     * will add on the extra space when resizing. Note that the lines could either be on the sides of the window or
+     * on it's top and bottom depending on the shape you give to the window.
+     */
     auto my_background_element = main_room->addElement();
-    my_background_element->setScale(20, 20);
-    my_background_element->setPosition(-1000, -1000);
+    my_background_element->setScale(200, 200);
+    my_background_element->setPosition(-5000, -5000);
     my_background_element->depth = -50;
 
     auto my_background_sprite = my_background_element->addComponent<Sprite>();
     my_background_sprite->setTexture("resources/Square.png");
-    my_background_sprite->setColor(sf::Color::Green);
+    my_background_sprite->setColor(77, 152, 79, 255);
+
     my_rescale_camera->addSprite(my_background_sprite);
     my_reveal_camera->addSprite(my_background_sprite);
     my_letterbox_camera->addSprite(my_background_sprite);
-
-    // ADD YOUR CODE HERE ------------------------------------------------
-    /*
-     * How to add another room to the game:
-     *
-     * auto second_room game->addRoom();
-     *
-     * How to switch between rooms:
-     *
-     * game->switchRoom(1); // To second_room
-     * game->switchRoom(0); // To main_room
-     */
-
-    /* How to add an Element into a room:
-     * auto my_element = main_room->addElement();
-     *
-     * How to modify the new Element:
-     * my_element->setPosition(x, y);
-     * my_element->move(x, y);
-     * my_element->setScale(x, y);
-     * my_element->scale(x, y);
-     * my_element->setRotation(angle);
-     * my_element->rotate(angle);
-     * my_element->depth = new_depth;
-     *
-     * NOTE: depth indicates how close to the screen an Element is, the higher the depth the closer foreground.
-     *
-     * How to add an Element that follows the existing Element:
-     * auto child_element = my_element->addChild();
-     *
-     * How to destroy an Element:
-     * my_element->destroy();
-     *
-     * NOTE: When destroying an Element, all children Elements will be destroyed too.
-     */
-
-    /*
-     * How to add a Camera into an Element:
-     * auto my_camera = my_element->addComponent<Camera>();
-     *
-     * How to modify your new Camera:
-     * my_camera->setScaleType(Camera::ScaleType::[RESCALE, REVEAL, LETTERBOX]);
-     * my_camera->setSize(x, y);
-     *
-     * NOTE: The Camera size is NOT the same as the window size, it's the area of the world captured by the camera.
-     */
-
-    /*
-     * How to add a Sprite to an Element:
-     * auto my_sprite = my_element->addComponent<Sprite>();
-     *
-     * How to set a file to the Sprite:
-     * my_sprite->addTexture("image[.png, .jpg, .jpeg]");
-     *
-     * How to modify the Sprite:
-     * my_sprite->setColor(r, g, b, a);
-     * my_sprite->setColor(sf::Color::[Green, Red, Blue, etc]);
-     * my_sprite->setSpriteDepth(depth);
-     * my_sprite->addDepth(extra_depth);
-     *
-     * NOTE: Sprite depth comes second to the Element depth, if there are 2 Sprites from Elements with the same depth
-     * the sprite with the highest depth will be printed on top, but if the Elements depth are different then those will
-     * be the ones taken in account.
-     *
-     * How to make the sprite visible/invisible on the screen:
-     * my_camera->addSprite(my_sprite);
-     * my_camera->removeSprite(my_sprite);
-     */
-
-    /*
-     * How to add keyboard functions:
-     * auto my_inputs = my_element->addComponent<InputActions>();
-     * my_inputs->addInput(sf::Keyboard::[Right, Left, W, A, S, D, etc], &[function], [Element, Component], [Arguments]);
-     *
-     * Examples:
-     * Move an Element with AWSD:
-     * my_inputs->addInput(sf::Keyboard::D, &Element::move, my_element, 5.f, 0.f);
-     * my_inputs->addInput(sf::Keyboard::A, &Element::move, my_element, -5.f, 0.f);
-     * my_inputs->addInput(sf::Keyboard::W, &Element::move, my_element, 0.f, -5.f);
-     * my_inputs->addInput(sf::Keyboard::S, &Element::move, my_element, 0.f, 5.f);
-     *
-     * Make sprite invisible with I and visible with K
-     * my_inputs->addInput(sf::Keyboard::I, &Camera::removeSprite, my_camera, my_sprite);
-     * my_inputs->addInput(sf::Keyboard::K, &Camera::addSprite, my_camera, my_sprite);
-     *
-     * Change the color of the Sprite with J and L
-     * my_inputs->addInput(sf::Keyboard::I, &Sprite::setColor, my_sprite, sf::Color::Magenta);
-     * my_inputs->addInput(sf::Keyboard::K, &Sprite::setColor, my_sprite, sf::Color::Green);
-     */
-
-    // -------------------------------------------------------------------
 
     return game;
 }
