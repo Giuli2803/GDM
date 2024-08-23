@@ -85,7 +85,7 @@ class Camera : public Component
     /**
      * Generates a new render_target (window by default) to print the view into.
      */
-    unsigned int useNewTarget();
+    unsigned int useNewTarget(const std::string& title);
     void loop() override{};
     void renderLoop() override;
     void windowResizeEvent() override;

@@ -465,7 +465,7 @@ class Game
      * @param view_ sf::View of the new window.
      * @return id value of the new window.
      */
-    [[nodiscard]] u_int addSecondaryTarget(sf::View view_);
+    [[nodiscard]] u_int addSecondaryTarget(sf::View view_, const std::string& title);
 
     // Rooms related stuff
     [[maybe_unused]] void addRoom(std::shared_ptr<Room> room)
