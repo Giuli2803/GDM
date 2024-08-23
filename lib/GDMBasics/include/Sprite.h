@@ -27,6 +27,7 @@ class Sprite : public Component
     bool _actualize = true;
 
   public:
+    Bounds offset;
     // Constructor
     explicit Sprite(const std::weak_ptr<Element> &parent);
     ~Sprite() = default;
