@@ -3,11 +3,12 @@
  * @file
  */
 
+#ifndef GDMATEEXAMPLES_CAMERA_H
+#define GDMATEEXAMPLES_CAMERA_H
+
 #include "GDMBasics.h"
 #include "Sprite.h"
 
-#ifndef GDMATEEXAMPLES_CAMERA_H
-#define GDMATEEXAMPLES_CAMERA_H
 namespace mate
 {
 class Sprite;
@@ -92,6 +93,16 @@ class Camera : public Component
     void loop() override{};
     void renderLoop() override;
     void windowResizeEvent() override;
+
+#ifdef GDM_TESTING_ENABLED
+    std::weak_ptr<const Sprite> getTopSprite(){
+        return _visible_sprites.front();
+    }
+
+    std::weak_ptr<const Sprite> getBottomSprite(){
+        return _visible_sprites.back();
+    }
+#endif
 };
 } // namespace mate
 #endif // GDMATEEXAMPLES_CAMERA_H

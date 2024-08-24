@@ -10,5 +10,7 @@ target_link_libraries(
         gtest_main
 )
 
+target_compile_definitions(${PROJECT_NAME}_Camera PRIVATE GDM_TESTING_ENABLED)
+
 include(GoogleTest)
 gtest_discover_tests(${PROJECT_NAME}_Camera)

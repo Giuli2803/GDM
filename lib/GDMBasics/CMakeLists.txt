@@ -22,3 +22,7 @@ target_link_libraries(${PROJECT_NAME}
         sfml-audio
         sfml-window
         sfml-system)
+
+if (COVERAGE)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE GDM_TESTING_ENABLED)
+endif ()
