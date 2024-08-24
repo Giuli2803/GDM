@@ -1,7 +1,3 @@
-//
-// Created by elly_sparky on 27/02/24.
-//
-
 #include "GDMBasics.h"
 #include <gtest/gtest.h>
 
@@ -210,38 +206,3 @@ TEST(BasicsTest, SpriteDepth) {
     EXPECT_EQ(sprite->getElementDepth(), -2);
 
 }
-
-//////////////////////////Camera tests////////////////////////////
-/*TEST(BasicsTest, CameraViewSize) {
-    auto room = std::make_shared<mate::Room>();
-    auto game = mate::Game::getGame(400, 400, "MyGame", room);
-    auto element = room->addElement();
-    auto camera = element->addComponent<mate::Camera>();
-    //This view size has an aspect ratio of 480/360 = 4/3
-    camera->setSize(480, 360);
-
-    //RESCALE should scale the view when the window size changes, maintaining the aspect ratio
-    camera->setScaleType(mate::Camera::RESCALE);
-    game->setWindowSize(500, 360);
-    game->run_single_frame();
-    EXPECT_EQ(camera->getRatio(), 4.0f/3.0f);
-    EXPECT_EQ(camera->getSize().x, 480);
-    EXPECT_EQ(camera->getSize().y, 360);
-
-    //REVEAL should rescale the view to show more of the world when the window is resized
-    camera->setScaleType(mate::Camera::REVEAL);
-    game->setWindowSize(960, 360);
-    game->run_single_frame();
-    EXPECT_EQ(camera->getRatio(), 8.0f/3.0f);
-    EXPECT_EQ(camera->getSize().x, 960);
-    EXPECT_EQ(camera->getSize().y, 360);
-
-    //LETTERBOX should maintain the aspect ratio no matter what happens to the window by adding black rectangles
-    //For the propuse of testing this is the same as RESCALE since both the ratio and view size are constants
-    camera->setScaleType(mate::Camera::LETTERBOX);
-    game->setWindowSize(960, 720);
-    game->run_single_frame();
-    EXPECT_EQ(camera->getRatio(), 3.0f/8.0f);
-    EXPECT_EQ(camera->getSize().x, 960);
-    EXPECT_EQ(camera->getSize().y, 360);
-}*/
