@@ -40,7 +40,6 @@ class Camera : public Component
 
     float _aspect_ratio;
     ScaleType _scale_type = RESCALE;
-
   public:
     u_int target_id = 0; ///< id value of the target (window) to print into.
 
@@ -59,6 +58,10 @@ class Camera : public Component
     void setScaleType(ScaleType scale_type)
     {
         _scale_type = scale_type;
+    }
+
+    ScaleType getScaleType() const{
+        return _scale_type;
     }
 
     void setTarget(u_int id)

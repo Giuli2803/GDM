@@ -25,11 +25,8 @@ Camera::~Camera()
 
 float Camera::getRatio()
 {
-    if (_scale_type == REVEAL)
-    {
-        auto size = _view.getSize();
-        _aspect_ratio = size.x / size.y;
-    }
+    auto size = _view.getSize();
+    _aspect_ratio = size.x / size.y;
     return _aspect_ratio;
 }
 
