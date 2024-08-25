@@ -1,15 +1,16 @@
 #include "GDMBasics.h"
 #include <gtest/gtest.h>
 
-TEST(CameraTest, CameraViewSize) {
+TEST(CameraTest, CameraViewSize)
+{
     auto room = std::make_shared<mate::Room>();
     auto game = mate::Game::getGame(400, 400, "MyGame", room);
     auto element = room->addElement();
     auto camera = element->addComponent<mate::Camera>();
-    //This view size has an aspect ratio of 480/360 = 4/3
+    // This view size has an aspect ratio of 480/360 = 4/3
     camera->setSize(480, 360);
 
-    //RESCALE should scale the view when the window size changes, maintaining the aspect ratio
+    // RESCALE should scale the view when the window size changes, maintaining the aspect ratio
     camera->setScaleType(mate::Camera::RESCALE);
     EXPECT_EQ(camera->getScaleType(), mate::Camera::RESCALE);
 
@@ -19,12 +20,12 @@ TEST(CameraTest, CameraViewSize) {
     {
         game->runSingleFrame();
     }
-    EXPECT_EQ(camera->getRatio(), 480.0f/360.0f);
+    EXPECT_EQ(camera->getRatio(), 480.0f / 360.0f);
     EXPECT_EQ(camera->getSize().x, 480);
     EXPECT_EQ(camera->getSize().y, 360);
 
-    //LETTERBOX should maintain the aspect ratio no matter what happens to the window by adding black rectangles
-    //For the propuse of testing this is the same as RESCALE since both the ratio and view size are constants
+    // LETTERBOX should maintain the aspect ratio no matter what happens to the window by adding black rectangles
+    // For the propuse of testing this is the same as RESCALE since both the ratio and view size are constants
     camera->setScaleType(mate::Camera::LETTERBOX);
     EXPECT_EQ(camera->getScaleType(), mate::Camera::LETTERBOX);
 
@@ -34,7 +35,7 @@ TEST(CameraTest, CameraViewSize) {
     {
         game->runSingleFrame();
     }
-    EXPECT_EQ(camera->getRatio(), 480.0f/360.0f);
+    EXPECT_EQ(camera->getRatio(), 480.0f / 360.0f);
     EXPECT_EQ(camera->getSize().x, 480);
     EXPECT_EQ(camera->getSize().y, 360);
 
@@ -45,11 +46,11 @@ TEST(CameraTest, CameraViewSize) {
     {
         game->runSingleFrame();
     }
-    EXPECT_EQ(camera->getRatio(), 480.0f/360.0f);
+    EXPECT_EQ(camera->getRatio(), 480.0f / 360.0f);
     EXPECT_EQ(camera->getSize().x, 480);
     EXPECT_EQ(camera->getSize().y, 360);
 
-    //REVEAL should rescale the view to show more of the world when the window is resized
+    // REVEAL should rescale the view to show more of the world when the window is resized
     camera->setScaleType(mate::Camera::REVEAL);
     EXPECT_EQ(camera->getScaleType(), mate::Camera::REVEAL);
 
@@ -59,12 +60,13 @@ TEST(CameraTest, CameraViewSize) {
     {
         game->runSingleFrame();
     }
-    EXPECT_EQ(camera->getRatio(), 960.0f/360.0f);
+    EXPECT_EQ(camera->getRatio(), 960.0f / 360.0f);
     EXPECT_EQ(camera->getSize().x, 960);
     EXPECT_EQ(camera->getSize().y, 360);
 }
 
-TEST(CameraTest, CameraRatioTest) {
+TEST(CameraTest, CameraRatioTest)
+{
     auto element = std::make_shared<mate::Element>();
     auto camera = element->addComponent<mate::Camera>();
 
@@ -74,10 +76,11 @@ TEST(CameraTest, CameraRatioTest) {
 
     camera->setSize(500, 200);
     ratio = camera->getRatio();
-    EXPECT_EQ(ratio, 500.0f/200.0f);
+    EXPECT_EQ(ratio, 500.0f / 200.0f);
 }
 
-TEST(CameraTest, CameraTarget){
+TEST(CameraTest, CameraTarget)
+{
     auto element = std::make_shared<mate::Element>();
     auto camera = element->addComponent<mate::Camera>();
 
@@ -88,7 +91,8 @@ TEST(CameraTest, CameraTarget){
     EXPECT_EQ(target_id, camera->target_id);
 }
 
-TEST(CameraTest, SpriteSorting){
+TEST(CameraTest, SpriteSorting)
+{
     auto element = std::make_shared<mate::Element>();
     auto camera = element->addComponent<mate::Camera>();
 
@@ -125,4 +129,3 @@ TEST(CameraTest, SpriteSorting){
     EXPECT_EQ(camera->getTopSprite().lock(), sprite2);
     EXPECT_EQ(camera->getBottomSprite().lock(), sprite1);
 }
-

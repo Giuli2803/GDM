@@ -30,7 +30,7 @@ float Camera::getRatio()
     return _aspect_ratio;
 }
 
-unsigned int Camera::useNewTarget(const std::string& title)
+unsigned int Camera::useNewTarget(const std::string &title)
 {
     if (auto _spt_game = _game_manager.lock())
     {

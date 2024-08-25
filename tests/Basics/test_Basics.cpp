@@ -2,7 +2,8 @@
 #include <gtest/gtest.h>
 
 ///////////////////////////Game creation tests///////////////////////////////
-TEST(BasicsTest, RoomSwitching) {
+TEST(BasicsTest, RoomSwitching)
+{
     auto main_room = std::make_shared<mate::Room>();
     auto second_room = std::make_shared<mate::Room>();
 
@@ -21,7 +22,8 @@ TEST(BasicsTest, RoomSwitching) {
     ASSERT_EQ(game->getActiveRoom(), main_room);
 }
 
-TEST(BasicsTest, GameSingleton) {
+TEST(BasicsTest, GameSingleton)
+{
     std::shared_ptr<mate::Game> game = mate::Game::getGame();
     ASSERT_EQ(game, mate::Game::getGame());
 
@@ -35,7 +37,8 @@ TEST(BasicsTest, GameSingleton) {
     ASSERT_EQ(game_b, game_c);
 }
 
-TEST(BasicsTest, WindowSize) {
+TEST(BasicsTest, WindowSize)
+{
     auto main_room = std::make_shared<mate::Room>();
     auto game = mate::Game::getGame(400, 800, "MyGame", main_room);
 
@@ -49,25 +52,27 @@ TEST(BasicsTest, WindowSize) {
 }
 
 //////////////////////////Elements tests////////////////////////////
-TEST(BasicsTest, TopElementCreationAndDestruction){
+TEST(BasicsTest, TopElementCreationAndDestruction)
+{
     auto main_room = std::make_shared<mate::Room>();
     auto game = mate::Game::getGame(400, 400, "MyGame", main_room);
 
-    //Assert if the element was properly created
+    // Assert if the element was properly created
     auto test_element = main_room->addElement();
     ASSERT_EQ(main_room->getElementsCount(), 1);
 
-    //Assert if the element was properly destroyed
+    // Assert if the element was properly destroyed
     test_element->destroy();
     game->runSingleFrame();
     EXPECT_EQ(main_room->getElementsCount(), 0);
 }
 
-TEST(BasicsTest, ChildElementCreationAndDestruction){
+TEST(BasicsTest, ChildElementCreationAndDestruction)
+{
     auto main_room = std::make_shared<mate::Room>();
     auto game = mate::Game::getGame(400, 800, "MyGame", main_room);
 
-    //Assert if the element was properly created
+    // Assert if the element was properly created
     auto parent_element = main_room->addElement();
     auto child_element = parent_element->addChild();
     auto second_child_element = parent_element->addChild();
@@ -89,7 +94,8 @@ TEST(BasicsTest, ChildElementCreationAndDestruction){
     ASSERT_EQ(parent_element->getFullElementsCount(), 1);
 }
 
-TEST(BasicsTest, ElementCoords) {
+TEST(BasicsTest, ElementCoords)
+{
     auto room = std::make_shared<mate::Room>();
     mate::Element element(room);
 
@@ -118,7 +124,8 @@ TEST(BasicsTest, ElementCoords) {
     EXPECT_EQ(element.getRotation(), 260);
 }
 
-TEST(BasicsTest, ChildElementCoords) {
+TEST(BasicsTest, ChildElementCoords)
+{
     auto room = std::make_shared<mate::Room>();
     auto element = room->addElement();
     auto child = element->addChild();
@@ -138,7 +145,6 @@ TEST(BasicsTest, ChildElementCoords) {
     EXPECT_EQ(child->getWorldPosition().y, 6);
     EXPECT_EQ(child->getPosition().x, -1);
     EXPECT_EQ(child->getPosition().y, 1);
-
 
     element->setScale(2, -2);
     EXPECT_EQ(child->getWorldScale().x, 2);
@@ -177,7 +183,8 @@ TEST(BasicsTest, ChildElementCoords) {
 }*/
 
 //////////////////////////Sprites tests////////////////////////////
-TEST(BasicsTest, SpriteDepth) {
+TEST(BasicsTest, SpriteDepth)
+{
     auto room = std::make_shared<mate::Room>();
     auto element = room->addElement();
     auto sprite = element->addComponent<mate::Sprite>();
@@ -204,5 +211,4 @@ TEST(BasicsTest, SpriteDepth) {
     element->depth -= 2;
     EXPECT_EQ(sprite->getSpriteDepth(), UINT_MAX);
     EXPECT_EQ(sprite->getElementDepth(), -2);
-
 }

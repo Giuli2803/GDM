@@ -29,9 +29,9 @@ class Camera : public Component
      */
     enum ScaleType
     {
-        LETTERBOX,    ///< Keep the view ratio without stretching objects by adding black lines on the extra space.
-        RESCALE,      ///< Stretch the objects in the view to fit the window space while keeping the ratio.
-        REVEAL        ///< Keep the world objects sizes persistent and show more or less as the window changes in size.
+        LETTERBOX, ///< Keep the view ratio without stretching objects by adding black lines on the extra space.
+        RESCALE,   ///< Stretch the objects in the view to fit the window space while keeping the ratio.
+        REVEAL     ///< Keep the world objects sizes persistent and show more or less as the window changes in size.
     };
 
   private:
@@ -41,6 +41,7 @@ class Camera : public Component
 
     float _aspect_ratio;
     ScaleType _scale_type = RESCALE;
+
   public:
     u_int target_id = 0; ///< id value of the target (window) to print into.
 
@@ -61,7 +62,8 @@ class Camera : public Component
         _scale_type = scale_type;
     }
 
-    ScaleType getScaleType() const{
+    ScaleType getScaleType() const
+    {
         return _scale_type;
     }
 
@@ -89,17 +91,19 @@ class Camera : public Component
     /**
      * Generates a new render_target (window by default) to print the view into.
      */
-    unsigned int useNewTarget(const std::string& title);
+    unsigned int useNewTarget(const std::string &title);
     void loop() override{};
     void renderLoop() override;
     void windowResizeEvent() override;
 
 #ifdef GDM_TESTING_ENABLED
-    std::weak_ptr<const Sprite> getTopSprite(){
+    std::weak_ptr<const Sprite> getTopSprite()
+    {
         return _visible_sprites.front();
     }
 
-    std::weak_ptr<const Sprite> getBottomSprite(){
+    std::weak_ptr<const Sprite> getBottomSprite()
+    {
         return _visible_sprites.back();
     }
 #endif

@@ -7,6 +7,7 @@
 #ifndef GDMATE_GDMBASICS_H
 #define GDMATE_GDMBASICS_H
 
+#include "LocalCoords.h"
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include <iostream>
@@ -14,7 +15,6 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include "LocalCoords.h"
 
 namespace mate
 {
@@ -28,7 +28,8 @@ class TriggerManager;
 enum ShapeType
 {
     RECTANGLE ///< Calculated from the top left corner + height/width
-    ,CIRCLE ///< Calculated from center + radius [max dimension]
+        ,
+    CIRCLE ///< Calculated from center + radius [max dimension]
     // Todo: TRIANGLE?
 };
 
@@ -80,8 +81,10 @@ struct render_target
  * @tparam T Class that inherits from Component.
  */
 template <class T>
-concept valid_component =
-    std::is_base_of<Component, T>::value && requires(std::weak_ptr<Element> element) { T{element}; };
+concept valid_component = std::is_base_of<Component, T>::value && requires(std::weak_ptr<Element> element)
+{
+    T{element};
+};
 
 /**
  * @brief Abstract class for the implementation of special Element functionalities.
@@ -143,13 +146,11 @@ class Element : public mate::LocalCoords
 
   public:
     // Constructors
-    explicit Element(const std::shared_ptr<LocalCoords>& parent)
-        : LocalCoords(parent)
+    explicit Element(const std::shared_ptr<LocalCoords> &parent) : LocalCoords(parent)
     {
     }
 
-    explicit Element(const std::shared_ptr<LocalCoords>& parent, sf::Vector2f position)
-        : LocalCoords(position, parent)
+    explicit Element(const std::shared_ptr<LocalCoords> &parent, sf::Vector2f position) : LocalCoords(position, parent)
     {
     }
     /**
@@ -231,10 +232,7 @@ class Element : public mate::LocalCoords
      * @return All the related Element under it's authority (children + children's children + etc).
      */
     [[maybe_unused]] unsigned long getFullElementsCount();
-
-
 };
-
 
 /**
  * @brief Superposition detection.
@@ -266,8 +264,7 @@ class Trigger : public Element
      * @param follow Element to follow.
      * @param must_follow Should the Trigger be destroy when the Element gets removed?
      */
-    explicit Trigger(const std::shared_ptr<LocalCoords> &parent)
-        : Element(parent), id(generateId())
+    explicit Trigger(const std::shared_ptr<LocalCoords> &parent) : Element(parent), id(generateId())
     {
     }
 
@@ -367,19 +364,23 @@ class Room : public mate::LocalCoords
      */
     std::shared_ptr<Element> addElement();
 
-    void addTrigger(std::unique_ptr<Trigger> trigger){
+    void addTrigger(std::unique_ptr<Trigger> trigger)
+    {
         _triggers.addTrigger(std::move(trigger));
     }
 
-    void removeTrigger(int trigger_id){
+    void removeTrigger(int trigger_id)
+    {
         _triggers.removeTrigger(trigger_id);
     }
 
-    void checkTrigger(ShapeType shape, const TriggerShooter &shooter){
+    void checkTrigger(ShapeType shape, const TriggerShooter &shooter)
+    {
         _triggers.checkTrigger(shape, shooter);
     }
 
-    void curateTriggers(){
+    void curateTriggers()
+    {
         _triggers.curate();
     }
 
@@ -465,7 +466,7 @@ class Game
      * @param view_ sf::View of the new window.
      * @return id value of the new window.
      */
-    [[nodiscard]] u_int addSecondaryTarget(sf::View view_, const std::string& title);
+    [[nodiscard]] u_int addSecondaryTarget(sf::View view_, const std::string &title);
 
     // Rooms related stuff
     [[maybe_unused]] void addRoom(std::shared_ptr<Room> room)
@@ -473,7 +474,8 @@ class Game
         _rooms.push_back(std::move(room));
     }
 
-    [[maybe_unused]] std::shared_ptr<Room> addRoom(){
+    [[maybe_unused]] std::shared_ptr<Room> addRoom()
+    {
         auto room = std::make_shared<Room>();
         _rooms.push_back(room);
         return std::move(room);
@@ -511,7 +513,8 @@ class Game
      * @param main_room_ pre-existing main Room.
      * @return Game object.
      */
-    [[maybe_unused]] static std::shared_ptr<Game> getGame(int win_width_, int win_height_, const std::string &game_name_,
+    [[maybe_unused]] static std::shared_ptr<Game> getGame(int win_width_, int win_height_,
+                                                          const std::string &game_name_,
                                                           std::shared_ptr<Room> main_room_);
     /**
      * Generates a new Game object with the desired parameters only if there isn't an already existing Game.
@@ -521,7 +524,8 @@ class Game
      * @param rooms_list_ list of pre-existing rooms.
      * @return Game object.
      */
-    [[maybe_unused]] static std::shared_ptr<Game> getGame(int win_width_, int win_height_, const std::string &game_name_,
+    [[maybe_unused]] static std::shared_ptr<Game> getGame(int win_width_, int win_height_,
+                                                          const std::string &game_name_,
                                                           std::list<std::shared_ptr<Room>> &rooms_list_);
 
     // Others
@@ -551,8 +555,8 @@ using game_instance = std::shared_ptr<Game>;
 game_instance start();
 } // namespace mate
 
-#include "Sprite.h"
 #include "Camera.h"
 #include "InputActions.h"
+#include "Sprite.h"
 #include "TriggerShooter.h"
 #endif // GDMATE_GDMBASICS_H

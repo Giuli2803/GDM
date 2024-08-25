@@ -20,29 +20,29 @@ game_instance start()
     auto main_room = std::make_shared<Room>();
     auto game = Game::getGame(480, 360, "My Game Main Window - Rescale Mode", main_room);
 
-     /*
-      * We start by creating an element that will hold owr cameras.
-      * Usually you'll probably want a different element for each camera, but for this example this will suffice.
-      */
+    /*
+     * We start by creating an element that will hold owr cameras.
+     * Usually you'll probably want a different element for each camera, but for this example this will suffice.
+     */
     auto my_camera_element = main_room->addElement();
 
-     /* First, a RESCALE camera is one that will modify its aspect ratio when it's window is resized by stretching
-      * everything that the camera can see, keeping the information on screen constant but deforming the player
-      * perception of things in the world.
-      */
+    /* First, a RESCALE camera is one that will modify its aspect ratio when it's window is resized by stretching
+     * everything that the camera can see, keeping the information on screen constant but deforming the player
+     * perception of things in the world.
+     */
     auto my_rescale_camera = my_camera_element->addComponent<Camera>();
     my_rescale_camera->setScaleType(Camera::RESCALE);
     game->setWindowSize(400, 400);
     game->setWindowPosition(500, 50);
 
-     /* Secondly a REVEAL camera modifies its aspect ratio to match that of the window by showing more or less parts
-      * of the game world. This allows to keep the form of the world objects but also reveals extra information
-      * to players with bigger windows.
-      */
+    /* Secondly a REVEAL camera modifies its aspect ratio to match that of the window by showing more or less parts
+     * of the game world. This allows to keep the form of the world objects but also reveals extra information
+     * to players with bigger windows.
+     */
     auto my_reveal_camera = my_camera_element->addComponent<Camera>();
-     /* NOTE: we create a different window for the second and third cameras for a better visualization, but multiple
-      * cameras on a single window is actually possible even with cameras with different scale types.
-      */
+    /* NOTE: we create a different window for the second and third cameras for a better visualization, but multiple
+     * cameras on a single window is actually possible even with cameras with different scale types.
+     */
     uint second_window_id = my_reveal_camera->useNewTarget("My Game Second Window - Reveal Mode");
     my_reveal_camera->setScaleType(Camera::REVEAL);
     game->setWindowSize(400, 400, second_window_id);
@@ -63,8 +63,10 @@ game_instance start()
      * Now we will just generate some sprites so you can better appreciate the workings of the different cameras.
      */
     auto my_sprite_element = main_room->addElement();
-    for (int i = -5; i < 5; i++){
-        for (int j = -5; j < 5; j++){
+    for (int i = -5; i < 5; i++)
+    {
+        for (int j = -5; j < 5; j++)
+        {
             /*
              * Most of this sprites will be out of screen for all our windows. The REVEAL camera will be the only one
              * able to show all the circles on the window if you resize it enough. All the others will only show the
@@ -73,8 +75,8 @@ game_instance start()
             auto my_sprite = my_sprite_element->addComponent<Sprite>();
             my_sprite->setTexture("resources/Circle.png");
             my_sprite->setColor(random(), random(), random(), 255);
-            my_sprite->offset.rect_bounds.left = (float) i*150 - 30;
-            my_sprite->offset.rect_bounds.top = (float) j*150 - 30;
+            my_sprite->offset.rect_bounds.left = (float)i * 150 - 30;
+            my_sprite->offset.rect_bounds.top = (float)j * 150 - 30;
             // We have to add the sprites to the cameras, so they are visible on all of them.
             // You can try commenting one of these lines to see how you can hide sprites to certain cameras.
             my_rescale_camera->addSprite(my_sprite);

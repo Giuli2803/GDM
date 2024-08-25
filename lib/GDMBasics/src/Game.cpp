@@ -10,7 +10,8 @@ std::shared_ptr<Game> Game::_instance = nullptr;
 
 void Game::setWindowView(sf::View view_, u_int id_) const
 {
-    if(id_ == 0){
+    if (id_ == 0)
+    {
         _main_render_target.target->setView(view_);
         return;
     }
@@ -44,14 +45,14 @@ void Game::setWindowPosition(int x, int y, uint id_) const
 {
     if (id_ == 0)
     {
-        _main_render_target.target->setPosition(sf::Vector2i (x, y));
+        _main_render_target.target->setPosition(sf::Vector2i(x, y));
         return;
     }
     for (const auto &target : _secondary_targets)
     {
         if (target.id == id_)
         {
-            target.target->setPosition(sf::Vector2i (x, y));
+            target.target->setPosition(sf::Vector2i(x, y));
             return;
         }
     }
@@ -84,7 +85,7 @@ void Game::setWindowSize(int x, int y, uint id_) const
     {
         if (target.id == id_)
         {
-            target.target->setSize(sf::Vector2u (x, y));
+            target.target->setSize(sf::Vector2u(x, y));
             return;
         }
     }
@@ -151,7 +152,7 @@ void Game::draw(const std::shared_ptr<const ord_sprite> &sprite_, u_int id_)
     }
 }
 
-u_int Game::addSecondaryTarget(sf::View view_, const std::string& title)
+u_int Game::addSecondaryTarget(sf::View view_, const std::string &title)
 {
     render_target new_target;
     u_int id = new_target.id;
