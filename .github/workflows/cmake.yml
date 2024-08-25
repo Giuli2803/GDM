@@ -68,6 +68,7 @@ jobs:
           thresholds: '50 75'
 
       - name: Commit Coverage Report
+        if: ${{ github.event_name == 'push' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
