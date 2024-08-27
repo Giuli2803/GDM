@@ -25,3 +25,4 @@ FetchContent_MakeAvailable(googletest)
 
 add_subdirectory(Basics)
 add_subdirectory(Camera)
+add_subdirectory(Sprite)

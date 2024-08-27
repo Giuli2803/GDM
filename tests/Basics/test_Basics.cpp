@@ -171,7 +171,6 @@ TEST(BasicsTest, ChildElementCoords)
     EXPECT_EQ(child->getRotation(), 300);
 }
 
-//////////////////////////Components creation tests////////////////////////////
 /*TEST(BasicsTest, ComponentCreation){
     auto room = std::make_shared<mate::Room>();
     mate::Element element(room);
@@ -182,33 +181,3 @@ TEST(BasicsTest, ChildElementCoords)
     ASSERT_EQ(element.getComponent<mate::Sprite>(), sprite);
 }*/
 
-//////////////////////////Sprites tests////////////////////////////
-TEST(BasicsTest, SpriteDepth)
-{
-    auto room = std::make_shared<mate::Room>();
-    auto element = room->addElement();
-    auto sprite = element->addComponent<mate::Sprite>();
-    sprite->setSpriteDepth(0);
-
-    sprite->addDepth(-1);
-    EXPECT_EQ(sprite->getSpriteDepth(), 0);
-    EXPECT_EQ(sprite->getElementDepth(), 0);
-
-    sprite->addDepth(1);
-    EXPECT_EQ(sprite->getSpriteDepth(), 1);
-    EXPECT_EQ(sprite->getElementDepth(), 0);
-
-    sprite->addDepth(5);
-    EXPECT_EQ(sprite->getSpriteDepth(), 6);
-
-    sprite->addDepth(-3);
-    EXPECT_EQ(sprite->getSpriteDepth(), 3);
-
-    sprite->setSpriteDepth(UINT_MAX);
-    sprite->addDepth(1);
-    EXPECT_EQ(sprite->getSpriteDepth(), UINT_MAX);
-
-    element->depth -= 2;
-    EXPECT_EQ(sprite->getSpriteDepth(), UINT_MAX);
-    EXPECT_EQ(sprite->getElementDepth(), -2);
-}
