@@ -60,7 +60,7 @@ void Camera::renderLoop()
         auto spt_b = b.lock();
         int depth_a = spt_a->getElementDepth();
         int depth_b = spt_b->getElementDepth();
-        return (depth_a < depth_b || (depth_a == depth_b && spt_a->getSprite() < spt_b->getSprite()));
+        return (depth_a < depth_b || (depth_a == depth_b && spt_a->getSprite()->depth < spt_b->getSprite()->depth));
     });
 
     for (const auto &sprite : _visible_sprites)

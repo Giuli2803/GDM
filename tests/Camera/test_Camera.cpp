@@ -93,16 +93,18 @@ TEST(CameraTest, CameraTarget)
 
 TEST(CameraTest, SpriteSorting)
 {
-    auto element = std::make_shared<mate::Element>();
+    auto room = std::make_shared<mate::Room>();
+    auto game = mate::Game::getGame(400, 400, "MyGame", room);
+    auto element = room->addElement();
     auto camera = element->addComponent<mate::Camera>();
 
-    auto element1 = std::make_shared<mate::Element>();
+    auto element1 = room->addElement();
     auto sprite1 = element1->addComponent<mate::Sprite>();
 
-    auto element2 = std::make_shared<mate::Element>();
+    auto element2 = room->addElement();
     auto sprite2 = element2->addComponent<mate::Sprite>();
 
-    auto element3 = std::make_shared<mate::Element>();
+    auto element3 = room->addElement();
     auto sprite3 = element3->addComponent<mate::Sprite>();
 
     element1->depth = 0;
@@ -117,14 +119,12 @@ TEST(CameraTest, SpriteSorting)
     camera->addSprite(sprite2);
     camera->addSprite(sprite3);
     camera->renderLoop();
-
     // Lower depth sprites go to the front of the list (which prints it on the back).
     EXPECT_EQ(camera->getTopSprite().lock(), sprite1);
     EXPECT_EQ(camera->getBottomSprite().lock(), sprite3);
 
     element1->depth = 1;
     camera->renderLoop();
-
     // Element depth takes priority over sprite depth.
     EXPECT_EQ(camera->getTopSprite().lock(), sprite2);
     EXPECT_EQ(camera->getBottomSprite().lock(), sprite1);
