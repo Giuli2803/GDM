@@ -153,6 +153,22 @@ class Element : public mate::LocalCoords
     explicit Element(const std::shared_ptr<LocalCoords> &parent, sf::Vector2f position) : LocalCoords(position, parent)
     {
     }
+
+    explicit Element(const std::shared_ptr<LocalCoords> &parent, sf::Vector2f position, float rotation)
+        : LocalCoords(position, rotation, parent)
+    {
+    }
+
+    explicit Element(const std::shared_ptr<LocalCoords> &parent, sf::Vector2f position, sf::Vector2f scale)
+        : LocalCoords(position, scale, parent)
+    {
+    }
+
+    explicit Element(const std::shared_ptr<LocalCoords> &parent, sf::Vector2f position, sf::Vector2f scale, float rotation)
+        : LocalCoords(position, scale, rotation, parent)
+    {
+    }
+
     /**
      * Default constructor is meant for high priority Element objects, if the Element is meant to have a parent on
      * creation use one of the specific constructors for that.

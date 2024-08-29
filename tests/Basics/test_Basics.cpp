@@ -1,7 +1,9 @@
 #include "GDMBasics.h"
 #include <gtest/gtest.h>
+#include <cmath>
 
-///////////////////////////Game creation tests///////////////////////////////
+// Game creation tests
+
 TEST(BasicsTest, RoomSwitching)
 {
     auto main_room = std::make_shared<mate::Room>();
@@ -51,7 +53,8 @@ TEST(BasicsTest, WindowSize)
     EXPECT_EQ(game->getWindowSize().y, 800);
 }
 
-//////////////////////////Elements tests////////////////////////////
+// Element tests
+
 TEST(BasicsTest, TopElementCreationAndDestruction)
 {
     auto main_room = std::make_shared<mate::Room>();
@@ -65,6 +68,54 @@ TEST(BasicsTest, TopElementCreationAndDestruction)
     test_element->destroy();
     game->runSingleFrame();
     EXPECT_EQ(main_room->getElementsCount(), 0);
+}
+
+float getAngle(float angle){
+    angle = std::fmod(angle, 360.0f);
+    if (angle < 0){
+        angle += 360.0f;
+    }
+    return angle;
+}
+
+TEST(BasicsTest, ElementConstructors)
+{
+    std::shared_ptr<mate::Room> room = std::make_shared<mate::Room>();
+    auto element_a = std::make_shared<mate::Element>(room);
+    auto element_b = std::make_shared<mate::Element>(room, sf::Vector2f(20, -20));
+    auto element_c = std::make_shared<mate::Element>(room, sf::Vector2f(2, -2), sf::Vector2f(2, 3));
+    auto element_d = std::make_shared<mate::Element>(room, sf::Vector2f(-2, 0), 90);
+    auto element_e = std::make_shared<mate::Element>(room, sf::Vector2f(0, 2), sf::Vector2f(1, 0.5), -90);
+
+    EXPECT_EQ(element_a->getPosition().x, room->getPosition().x);
+    EXPECT_EQ(element_a->getPosition().y, room->getPosition().y);
+    EXPECT_EQ(element_a->getScale().x, room->getScale().x);
+    EXPECT_EQ(element_a->getScale().y, room->getScale().y);
+    EXPECT_EQ(element_a->getRotation(), room->getRotation());
+
+    EXPECT_EQ(element_b->getPosition().x, room->getPosition().x + 20);
+    EXPECT_EQ(element_b->getPosition().y, room->getPosition().y - 20);
+    EXPECT_EQ(element_b->getScale().x, room->getScale().x);
+    EXPECT_EQ(element_b->getScale().y, room->getScale().y);
+    EXPECT_EQ(element_b->getRotation(), room->getRotation());
+
+    EXPECT_EQ(element_c->getPosition().x, room->getPosition().x + 2);
+    EXPECT_EQ(element_c->getPosition().y, room->getPosition().y - 2);
+    EXPECT_EQ(element_c->getScale().x, room->getScale().x*2);
+    EXPECT_EQ(element_c->getScale().y, room->getScale().y*3);
+    EXPECT_EQ(element_c->getRotation(), room->getRotation());
+
+    EXPECT_EQ(element_d->getPosition().x, room->getPosition().x - 2);
+    EXPECT_EQ(element_d->getPosition().y, room->getPosition().y);
+    EXPECT_EQ(element_d->getScale().x, room->getScale().x);
+    EXPECT_EQ(element_d->getScale().y, room->getScale().y);
+    EXPECT_EQ(element_d->getRotation(), getAngle(room->getRotation()+90));
+
+    EXPECT_EQ(element_e->getPosition().x, room->getPosition().x);
+    EXPECT_EQ(element_e->getPosition().y, room->getPosition().y + 2);
+    EXPECT_EQ(element_e->getScale().x, room->getScale().x);
+    EXPECT_EQ(element_e->getScale().y, room->getScale().y*0.5f);
+    EXPECT_EQ(element_e->getRotation(), getAngle(room->getRotation()-90));
 }
 
 TEST(BasicsTest, ChildElementCreationAndDestruction)
