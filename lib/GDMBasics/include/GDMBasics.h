@@ -257,7 +257,7 @@ class Element : public mate::LocalCoords
  * a TriggerShooter gets on top of them. Currently Trigger does not support for depth, but are expected to do so in the
  * near future.
  */
-class Trigger : public Element
+class Trigger : public LocalCoords
 {
   private:
     const int id;
@@ -280,7 +280,7 @@ class Trigger : public Element
      * @param follow Element to follow.
      * @param must_follow Should the Trigger be destroy when the Element gets removed?
      */
-    explicit Trigger(const std::shared_ptr<LocalCoords> &parent) : Element(parent), id(generateId())
+    explicit Trigger(const std::shared_ptr<LocalCoords> &parent) : LocalCoords(parent), id(generateId())
     {
     }
 
@@ -341,6 +341,18 @@ class TriggerManager
     static bool circleToCircleCheck(sf::Vector2f circ1_pos, float circ1_rad, sf::Vector2f circ2_pos, float circ2_rad);
     static bool circleToRectangleCheck(sf::Vector2f circ_pos, float radius, sf::Vector2f rect_pos,
                                        sf::Vector2f rect_dim);
+
+#ifdef GDM_TESTING_ENABLED
+    uint getListCount(){ return triggers.size(); }
+    bool triggerIsContained(int trigger_id){
+        for (auto& trigger : triggers){
+            if(trigger->getID() == trigger_id){
+                return true;
+            }
+        }
+        return false;
+    }
+#endif
 };
 
 /**
