@@ -222,6 +222,30 @@ TEST(BasicsTest, ChildElementCoords)
     EXPECT_EQ(child->getRotation(), 300);
 }
 
+TEST(BasicsTest, WeakPointerIsUninitialized){
+    std::weak_ptr<mate::Room> room;
+    std::weak_ptr<mate::Element> element;
+
+    EXPECT_EQ(mate::weakPtrIsUninitialized(room), true);
+    EXPECT_EQ(mate::weakPtrIsUninitialized(element), true);
+
+    {
+        auto shared_room = std::make_shared<mate::Room>();
+        auto shared_element = shared_room->addElement();
+        room = shared_room;
+        element = shared_element;
+
+        EXPECT_EQ(mate::weakPtrIsUninitialized(room), false);
+        EXPECT_EQ(mate::weakPtrIsUninitialized(element), false);
+    }
+    // Out of scope, shared_room & shared_element are expired
+
+    EXPECT_EQ(room.expired(), true);
+    EXPECT_EQ(element.expired(), true);
+    EXPECT_EQ(mate::weakPtrIsUninitialized(room), false);
+    EXPECT_EQ(mate::weakPtrIsUninitialized(element), false);
+}
+
 /*TEST(BasicsTest, ComponentCreation){
     auto room = std::make_shared<mate::Room>();
     mate::Element element(room);
