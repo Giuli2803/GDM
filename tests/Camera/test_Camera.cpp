@@ -81,7 +81,9 @@ TEST(CameraTest, CameraRatioTest)
 
 TEST(CameraTest, CameraTarget)
 {
-    auto element = std::make_shared<mate::Element>();
+    auto room = std::make_shared<mate::Room>();
+    auto game = mate::Game::getGame(400, 400, "", room);
+    auto element = room->addElement();
     auto camera = element->addComponent<mate::Camera>();
 
     EXPECT_EQ(camera->target_id, 0);
@@ -89,6 +91,10 @@ TEST(CameraTest, CameraTarget)
     auto target_id = camera->useNewTarget("");
     EXPECT_NE(camera->target_id, 0);
     EXPECT_EQ(target_id, camera->target_id);
+
+    camera->setSize(500, 500);
+    element->renderLoop();
+    EXPECT_EQ((game->getView(target_id)).getViewport(), (camera->getView()).getViewport());
 }
 
 TEST(CameraTest, SpriteSorting)

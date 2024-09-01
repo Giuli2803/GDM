@@ -106,6 +106,8 @@ class Camera : public Component
     {
         return _visible_sprites.back();
     }
+
+    sf::View getView() const { return _view; }
 #endif
 };
 } // namespace mate

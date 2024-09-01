@@ -477,6 +477,21 @@ class Game
         _main_render_target.target->setView(_main_render_target.target->getDefaultView());
     }
 
+#ifdef GDM_TESTING_ENABLED
+    [[nodiscard]] sf::View getView(u_int id_) const{
+        if (id_==0)
+        {
+            return _main_render_target.target->getView();
+        }
+        for(auto& target : _secondary_targets){
+            if(target.id == id_){
+                return target.target->getView();
+            }
+        }
+        return {};
+    }
+#endif
+
     [[nodiscard]] sf::Vector2i getWindowPosition(uint id_ = 0) const;
     void setWindowPosition(int x, int y, uint id_ = 0) const;
     [[nodiscard]] sf::Vector2u getWindowSize(uint id_ = 0) const;
