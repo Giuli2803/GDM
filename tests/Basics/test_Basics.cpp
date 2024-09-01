@@ -55,6 +55,20 @@ TEST(BasicsTest, WindowSize)
 
 // Element tests
 
+TEST(BasicsTest, ElementParent){
+    auto room = std::make_shared<mate::Room>();
+    auto element = room->addElement();
+
+    std::weak_ptr<mate::LocalCoords> weak_room = room;
+    EXPECT_EQ(element->getParent().lock(), weak_room.lock());
+
+    auto element_b = std::make_shared<mate::Element>();
+    EXPECT_EQ(element_b->getParent().lock(), nullptr);
+
+    element_b->setParent(room);
+    EXPECT_EQ(element_b->getParent().lock(), weak_room.lock());
+}
+
 TEST(BasicsTest, TopElementCreationAndDestruction)
 {
     auto main_room = std::make_shared<mate::Room>();
@@ -66,6 +80,14 @@ TEST(BasicsTest, TopElementCreationAndDestruction)
 
     // Assert if the element was properly destroyed
     test_element->destroy();
+    game->runSingleFrame();
+    EXPECT_EQ(main_room->getElementsCount(), 0);
+
+    auto element_b = std::make_shared<mate::Element>();
+    main_room->addElement(element_b);
+    ASSERT_EQ(main_room->getElementsCount(), 1);
+
+    element_b->destroy();
     game->runSingleFrame();
     EXPECT_EQ(main_room->getElementsCount(), 0);
 }
@@ -245,6 +267,8 @@ TEST(BasicsTest, WeakPointerIsUninitialized){
     EXPECT_EQ(mate::weakPtrIsUninitialized(room), false);
     EXPECT_EQ(mate::weakPtrIsUninitialized(element), false);
 }
+
+
 
 /*TEST(BasicsTest, ComponentCreation){
     auto room = std::make_shared<mate::Room>();
