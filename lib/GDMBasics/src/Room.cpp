@@ -20,7 +20,7 @@ std::shared_ptr<Element> Room::addElement()
     return std::move(child_element);
 }
 
-void Room::dataLoop()
+void Room::loop()
 {
 
     for (auto &element : _elements)
@@ -39,11 +39,11 @@ void Room::renderLoop()
     }
 }
 
-[[maybe_unused]] void Room::resizeEvent()
+[[maybe_unused]] void Room::windowResizeEvent()
 {
     for (auto &element : _elements)
     {
-        element->resizeEvent();
+        element->windowResizeEvent();
     }
 }
 } // namespace mate

@@ -11,7 +11,7 @@ void TriggerManager::removeTrigger(int trigger_id)
     {
         if (trigger->getID() == trigger_id)
         {
-            trigger->markForRemoval();
+            trigger->destroy();
         }
     }
 }

@@ -24,13 +24,15 @@ void Element::destroy()
 
 void Element::loop()
 {
+    _components.remove_if([](auto &component) { return component->shouldDestroy(); });
+
     if (!_destroy_flag)
     {
         for (const auto &component : _components)
         {
+            component->loop();
             if (_destroy_flag)
                 break;
-            component->loop();
         }
     }
 
@@ -61,11 +63,11 @@ void Element::renderLoop()
     }
 }
 
-void Element::resizeEvent()
+void Element::windowResizeEvent()
 {
     for (auto &element : _elements)
     {
-        element->resizeEvent();
+        element->windowResizeEvent();
     }
 
     for (const auto &component : _components)
