@@ -76,7 +76,7 @@ TEST(TriggersTest, TriggersTrackingOnManager){
     EXPECT_EQ(manager.triggerIsContained(id_b), true);
 
     manager.removeTrigger(id_a);
-    manager.curate();
+    manager.curateTriggers();
     EXPECT_EQ(manager.getListCount(), 1);
     EXPECT_EQ(manager.triggerIsContained(id_a), false);
     EXPECT_EQ(manager.triggerIsContained(id_b), true);
@@ -90,7 +90,7 @@ TEST(TriggersTest, TriggersTrackingOnManager){
     manager.addTrigger(std::move(trigger_c));
     EXPECT_EQ(manager.getListCount(), 2);
     EXPECT_EQ(manager.triggerIsContained(id_c), true);
-    manager.curate();
+    manager.curateTriggers();
     EXPECT_EQ(manager.getListCount(), 1);
     EXPECT_EQ(manager.triggerIsContained(id_c), false);
 }

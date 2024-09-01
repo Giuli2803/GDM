@@ -30,7 +30,6 @@ enum ShapeType
     RECTANGLE ///< Calculated from the top left corner + height/width
         ,
     CIRCLE ///< Calculated from center + radius [max dimension]
-    // Todo: TRIANGLE?
 };
 
 /**
@@ -59,7 +58,7 @@ struct ord_sprite
  */
 struct render_target
 {
-    // Todo: Use an sf::RenderTarget instead of a _target
+    // Todo: Use an sf::RenderTarget instead of an sf::RenderWindow
     // The target contains the dimensions of the window where the  sprites will be printed
     std::unique_ptr<sf::RenderWindow> target{};
     const u_int id;
@@ -136,10 +135,6 @@ class Component
 class Element : public mate::LocalCoords
 {
   private:
-    // Shared pointer is used since other components might need to hold a reference, yet this should
-    // be the only shared pointer to this particular components and elements, all others should be weak pointers
-    // Todo: Find a way to use unique_ptr and references maybe.
-    //  Element->FindComponent->modify template? Only if find isn't costly and can't be confused (It CAN be confused).
     std::vector<std::shared_ptr<Component>> _components;
     std::list<std::shared_ptr<Element>> _elements;
     bool _destroy_flag = false;
@@ -327,7 +322,7 @@ class TriggerManager
     /**
      * Removes all Triggers that are marked for removal.
      */
-    void curate()
+    void curateTriggers()
     {
         triggers.remove_if([](const std::unique_ptr<Trigger> &trigger) { return trigger->shouldRemove(); });
     }
@@ -335,7 +330,7 @@ class TriggerManager
     /**
      * Checks if the TriggerShooter is within any of the active Triggers.
      */
-    void checkTrigger(ShapeType shape, const TriggerShooter &shooter);
+    virtual void checkTrigger(ShapeType shape, const TriggerShooter &shooter);
     static bool rectangleToRectangleCheck(sf::Vector2f rect1_pos, sf::Vector2f rect1_dim, sf::Vector2f rect2_pos,
                                           sf::Vector2f rect2_dim);
     static bool circleToCircleCheck(sf::Vector2f circ1_pos, float circ1_rad, sf::Vector2f circ2_pos, float circ2_rad);
@@ -363,11 +358,10 @@ class TriggerManager
  * different levels, scenes or menu windows, so the Game object can switch between this by simply selecting a different
  * Room that already contains all the data of the Elements involved.
  */
-class Room : public mate::LocalCoords
+class Room : public mate::LocalCoords, public TriggerManager
 {
   private:
     std::list<std::shared_ptr<Element>> _elements; ///< Elements within the Room.
-    TriggerManager _triggers;
 
   public:
     // Constructors
@@ -391,26 +385,6 @@ class Room : public mate::LocalCoords
      * @return New Element added to the Room.
      */
     std::shared_ptr<Element> addElement();
-
-    void addTrigger(std::unique_ptr<Trigger> trigger)
-    {
-        _triggers.addTrigger(std::move(trigger));
-    }
-
-    void removeTrigger(int trigger_id)
-    {
-        _triggers.removeTrigger(trigger_id);
-    }
-
-    void checkTrigger(ShapeType shape, const TriggerShooter &shooter)
-    {
-        _triggers.checkTrigger(shape, shooter);
-    }
-
-    void curateTriggers()
-    {
-        _triggers.curate();
-    }
 
     // Loops
 
@@ -443,7 +417,7 @@ class Room : public mate::LocalCoords
  * Game contains all of the Room objects from the game, runs the loop() method of the active one, tracks the window(s)
  * and keeps the TriggerManager.
  */
-class Game
+class Game : public TriggerManager
 {
   private:
     std::list<std::shared_ptr<Room>> _rooms;
@@ -530,16 +504,17 @@ class Game
     }
 
     // Trigger related stuff
-    void addTrigger(std::unique_ptr<Trigger> trigger)
+    void addRoomTrigger(std::unique_ptr<Trigger> trigger)
     {
         _active_room->addTrigger(std::move(trigger));
     }
-    void removeTrigger(int trigger_id)
+    void removeRoomTrigger(int trigger_id)
     {
         _active_room->removeTrigger(trigger_id);
     }
-    void checkTrigger(ShapeType shape, const TriggerShooter &shooter)
+    void checkTrigger(ShapeType shape, const TriggerShooter &shooter) override
     {
+        TriggerManager::checkTrigger(shape, shooter);
         _active_room->checkTrigger(shape, shooter);
     }
 
