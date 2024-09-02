@@ -161,11 +161,11 @@ concept valid_component = std::is_base_of<Component, T>::value && requires(std::
 class Component : public ILowLoop
 {
   public:
-    explicit Component(std::weak_ptr<class Element> parent) : _parent(std::move(parent))
+    explicit Component(std::weak_ptr<class LocalCoords> parent) : _parent(std::move(parent))
     {
     }
   protected:
-    std::weak_ptr<Element> _parent; ///< Element that contains the Component and controls it's destruction.
+    std::weak_ptr<LocalCoords> _parent; ///< Element that contains the Component and controls it's destruction.
 };
 
 /**

@@ -35,7 +35,7 @@ void Sprite::loop()
 {
     if (_actualize)
     {
-        if (std::shared_ptr<Element> spt_parent = _parent.lock())
+        if (std::shared_ptr<LocalCoords> spt_parent = _parent.lock())
         {
             _sprite->sprite.setScale(offset.getDimensionBounds(spt_parent->getWorldScale()));
             _sprite->sprite.setRotation(spt_parent->getWorldRotation());
