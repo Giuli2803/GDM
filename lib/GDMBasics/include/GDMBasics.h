@@ -384,17 +384,24 @@ class TriggerManager
 class Room : public mate::LocalCoords, public TriggerManager, public ILoop
 {
   private:
-    std::list<std::shared_ptr<Element>> _elements; ///< Elements within the Room.
+    std::list<std::shared_ptr<ILowLoop>> _children_loops; ///< Elements within the Room.
 
   public:
     // Constructors
     Room() = default;
 
-    // Element stuff
-    [[maybe_unused]] unsigned long getElementsCount()
+#ifdef GDM_TESTING_ENABLED
+    template <class T> unsigned long getLoopTypeCount()
     {
-        return _elements.size();
+        ulong count = 0;
+        for (const auto& loop : _children_loops){
+            if(std::dynamic_pointer_cast<T>(loop)){
+                count++;
+            }
+        }
+        return count;
     }
+#endif
     /**
      * @brief Adds a preexisting Element to the Room.
      *

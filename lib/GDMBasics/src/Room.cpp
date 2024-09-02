@@ -10,30 +10,30 @@ namespace mate
 {
     if (weakPtrIsUninitialized(element->getParent()))
         element->setParent(shared_from_this());
-    _elements.push_back(std::move(element));
+    _children_loops.push_back(std::move(element));
 }
 
 std::shared_ptr<Element> Room::addElement()
 {
     auto child_element = std::make_shared<Element>(shared_from_this(), getPosition());
-    _elements.push_back(child_element);
+    _children_loops.push_back(child_element);
     return std::move(child_element);
 }
 
 void Room::loop()
 {
 
-    for (auto &element : _elements)
+    for (auto &element : _children_loops)
     {
         element->loop();
     }
 
-    _elements.remove_if([](auto &element) { return element->shouldDestroy(); });
+    _children_loops.remove_if([](auto &element) { return element->shouldDestroy(); });
 }
 
 void Room::renderLoop()
 {
-    for (auto &element : _elements)
+    for (auto &element : _children_loops)
     {
         element->renderLoop();
     }
@@ -41,7 +41,7 @@ void Room::renderLoop()
 
 [[maybe_unused]] void Room::windowResizeEvent()
 {
-    for (auto &element : _elements)
+    for (auto &element : _children_loops)
     {
         element->windowResizeEvent();
     }

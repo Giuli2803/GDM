@@ -76,20 +76,20 @@ TEST(BasicsTest, TopElementCreationAndDestruction)
 
     // Assert if the element was properly created
     auto test_element = main_room->addElement();
-    ASSERT_EQ(main_room->getElementsCount(), 1);
+    ASSERT_EQ(main_room->getLoopTypeCount<mate::Element>(), 1);
 
     // Assert if the element was properly destroyed
     test_element->destroy();
     game->runSingleFrame();
-    EXPECT_EQ(main_room->getElementsCount(), 0);
+    EXPECT_EQ(main_room->getLoopTypeCount<mate::Element>(), 0);
 
     auto element_b = std::make_shared<mate::Element>();
     main_room->addElement(element_b);
-    ASSERT_EQ(main_room->getElementsCount(), 1);
+    ASSERT_EQ(main_room->getLoopTypeCount<mate::Element>(), 1);
 
     element_b->destroy();
     game->runSingleFrame();
-    EXPECT_EQ(main_room->getElementsCount(), 0);
+    EXPECT_EQ(main_room->getLoopTypeCount<mate::Element>(), 0);
 }
 
 float getAngle(float angle){
@@ -150,7 +150,7 @@ TEST(BasicsTest, ChildElementCreationAndDestruction)
     auto child_element = parent_element->addChild();
     auto second_child_element = parent_element->addChild();
 
-    ASSERT_EQ(main_room->getElementsCount(), 1);
+    ASSERT_EQ(main_room->getLoopTypeCount<mate::Element>(), 1);
     ASSERT_EQ(parent_element->getElementsCount(), 2);
     ASSERT_EQ(parent_element->getFullElementsCount(), 2);
 
