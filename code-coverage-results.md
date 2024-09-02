@@ -2,6 +2,6 @@
 
 Package | Line Rate | Branch Rate | Health
 -------- | --------- | ----------- | ------
-lib.GDMBasics.include | 92% | 52% | ✔
-lib.GDMBasics.src | 87% | 59% | ✔
-**Summary** | **89%** (400 / 451) | **56%** (351 / 629) | ✔
+lib.GDMBasics.include | 93% | 52% | ✔
+lib.GDMBasics.src | 87% | 58% | ✔
+**Summary** | **89%** (413 / 465) | **55%** (361 / 655) | ✔
