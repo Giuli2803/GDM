@@ -47,7 +47,7 @@ void Camera::renderLoop()
         return;
     }
 
-    if (std::shared_ptr<Element> spt_parent = _parent.lock())
+    if (std::shared_ptr<LocalCoords> spt_parent = _parent.lock())
     {
         _view.setCenter(spt_parent->getWorldPosition());
         _view.setRotation(spt_parent->getWorldRotation());

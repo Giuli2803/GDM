@@ -18,7 +18,7 @@ TEST(InputActionsTest, FunctionActionCalls){
     mate::isKeyPressed = [](sf::Keyboard::Key key){
         return false;
     };
-    room->dataLoop();
+    room->loop();
     ASSERT_EQ(test_bool, false);
 
     mate::isKeyPressed = [](sf::Keyboard::Key key){
@@ -26,7 +26,7 @@ TEST(InputActionsTest, FunctionActionCalls){
             return false;
         return true;
     };
-    room->dataLoop();
+    room->loop();
     ASSERT_EQ(test_bool, false);
 
 
@@ -35,7 +35,7 @@ TEST(InputActionsTest, FunctionActionCalls){
             return true;
         return false;
     };
-    room->dataLoop();
+    room->loop();
     ASSERT_EQ(test_bool, true);
 }
 
@@ -52,20 +52,20 @@ TEST(InputActionsTest, MethodFunctionCalls){
             return false;
         };
 
-        room->dataLoop();
+        room->loop();
         EXPECT_EQ(element_b->getWorldPosition(), sf::Vector2f (0.0f, 0.0f));
 
         mate::isKeyPressed = [](sf::Keyboard::Key key){
             return true;
         };
-        room->dataLoop();
+        room->loop();
         EXPECT_EQ(element_b->getWorldPosition(), sf::Vector2f (5.0f, -2.0f));
         element_b->destroy();
     }
 
     EXPECT_EQ(input->getActionsCount(), 1);
-    room->dataLoop();
-    room->dataLoop();
+    room->loop();
+    room->loop();
     EXPECT_EQ(input->getActionsCount(), 0);
 }
 

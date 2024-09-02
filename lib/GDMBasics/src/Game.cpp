@@ -193,7 +193,7 @@ void Game::runSingleFrame()
         case sf::Event::Closed:
             exit(EXIT_SUCCESS);
         case sf::Event::Resized:
-            _active_room->resizeEvent();
+            _active_room->windowResizeEvent();
             break;
         default:
             break;
@@ -209,7 +209,7 @@ void Game::runSingleFrame()
             case sf::Event::Closed:
                 target.target->setVisible(false);
             case sf::Event::Resized:
-                _active_room->resizeEvent();
+                _active_room->windowResizeEvent();
                 break;
             default:
                 break;
@@ -222,7 +222,7 @@ void Game::runSingleFrame()
     _active_room->curateTriggers();
 
     // Todo: Data loop
-    _active_room->dataLoop();
+    _active_room->loop();
 
     // Todo: Render Loop
     _main_render_target.target->clear();

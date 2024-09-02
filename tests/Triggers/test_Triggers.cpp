@@ -76,7 +76,7 @@ TEST(TriggersTest, TriggersTrackingOnManager){
     EXPECT_EQ(manager.triggerIsContained(id_b), true);
 
     manager.removeTrigger(id_a);
-    manager.curate();
+    manager.curateTriggers();
     EXPECT_EQ(manager.getListCount(), 1);
     EXPECT_EQ(manager.triggerIsContained(id_a), false);
     EXPECT_EQ(manager.triggerIsContained(id_b), true);
@@ -84,13 +84,13 @@ TEST(TriggersTest, TriggersTrackingOnManager){
 
     auto trigger_c = std::make_unique<mate::TestTrigger>();
     int id_c = trigger_c->getID();
-    trigger_c->markForRemoval();
-    EXPECT_EQ(trigger_c->shouldRemove(), true);
+    trigger_c->destroy();
+    EXPECT_EQ(trigger_c->shouldDestroy(), true);
 
     manager.addTrigger(std::move(trigger_c));
     EXPECT_EQ(manager.getListCount(), 2);
     EXPECT_EQ(manager.triggerIsContained(id_c), true);
-    manager.curate();
+    manager.curateTriggers();
     EXPECT_EQ(manager.getListCount(), 1);
     EXPECT_EQ(manager.triggerIsContained(id_c), false);
 }
@@ -135,53 +135,53 @@ TEST(TriggersTest, TriggerActivation){
     shooter->setPositionOffset(0, 0);
     shooter->shape = mate::ShapeType::RECTANGLE;
 
-    room->dataLoop();
+    room->loop();
     EXPECT_EQ(mate::TestTrigger::count, starting_count);
 
     // RECTANGLE moving shooter to CIRCLE  static trigger
     element_b->setPosition(5, 5);
-    room->dataLoop();
+    room->loop();
     EXPECT_EQ(mate::TestTrigger::count, starting_count+1);
 
     element_b->setPosition(4, 4);
-    room->dataLoop();
+    room->loop();
     EXPECT_EQ(mate::TestTrigger::count, starting_count+2);
 
     element_b->setPosition(3.001, 3.001);
-    room->dataLoop();
+    room->loop();
     EXPECT_EQ(mate::TestTrigger::count, starting_count+2);
 
     // RECTANGLE moving shooter to RECTANGLE static trigger
     element_b->setPosition(-5, 5);
-    room->dataLoop();
+    room->loop();
     EXPECT_EQ(mate::TestTrigger::count, starting_count+3);
 
     element_b->setPosition(-6.999, 3.001);
-    room->dataLoop();
+    room->loop();
     EXPECT_EQ(mate::TestTrigger::count, starting_count+4);
 
     // RECTANGLE moving shooter to CIRCLE moving trigger
     element_b->setPosition(0, 0);
     element->setPosition(0, 0);
 
-    room->dataLoop();
+    room->loop();
     EXPECT_EQ(mate::TestTrigger::count, starting_count+5);
-    room->dataLoop();
+    room->loop();
     EXPECT_EQ(mate::TestTrigger::count, starting_count+6);
 
     // CIRCLE moving trigger to CIRCLE static trigger
     shooter->shape = mate::ShapeType::CIRCLE;
 
     element_b->setPosition(5, 5);
-    room->dataLoop();
+    room->loop();
     EXPECT_EQ(mate::TestTrigger::count, starting_count+7);
 
     element_b->setPosition(4, 4);
-    room->dataLoop();
+    room->loop();
     EXPECT_EQ(mate::TestTrigger::count, starting_count+8);
 
     element_b->setPosition(3.001, 3.001);
-    room->dataLoop();
+    room->loop();
     EXPECT_EQ(mate::TestTrigger::count, starting_count+8);
 }
 

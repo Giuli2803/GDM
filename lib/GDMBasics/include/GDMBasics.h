@@ -30,7 +30,6 @@ enum ShapeType
     RECTANGLE ///< Calculated from the top left corner + height/width
         ,
     CIRCLE ///< Calculated from center + radius [max dimension]
-    // Todo: TRIANGLE?
 };
 
 /**
@@ -59,7 +58,7 @@ struct ord_sprite
  */
 struct render_target
 {
-    // Todo: Use an sf::RenderTarget instead of a _target
+    // Todo: Use an sf::RenderTarget instead of an sf::RenderWindow
     // The target contains the dimensions of the window where the  sprites will be printed
     std::unique_ptr<sf::RenderWindow> target{};
     const u_int id;
@@ -76,42 +75,61 @@ struct render_target
     }
 };
 
-/**
- * Verifies if a Component implementation has a constructor that takes as it's only parameter an Element.
- * @tparam T Class that inherits from Component.
- */
-template <class T>
-concept valid_component = std::is_base_of<Component, T>::value && requires(std::weak_ptr<Element> element)
+class IDestroy
 {
-    T{element};
+  protected:
+    bool _destroy_flag = false;
+
+  public:
+    /**
+     * When IDestroy is set for destruction the effect is not immediate, this is to avoid the destruction to occur
+     * while a code thread is being executed (Like a sef-destruction case). shouldDestroy()
+     * allows to now if IDestroy is going to be destroy less than a frame before the event occurs.
+     *
+     * @return true if IDestroy is marked for destruction.
+     */
+    [[nodiscard]] bool shouldDestroy() const
+    {
+        return _destroy_flag;
+    }
+    /**
+     * @brief Marks the IDestroy for destruction.
+     *
+     * Marks the IDestroy for destruction. The removal itself is not immediate and can even not occur, the flag exists
+     * to inform the object and other objects of the intention of being destroyed, but the deletion itself should be
+     * managed separately.
+     */
+    virtual void destroy()
+    {
+        _destroy_flag = true;
+    }
 };
 
 /**
- * @brief Abstract class for the implementation of special Element functionalities.
+ * @brief Interface. Defines all the "loop" and "event" methods for the building blocks of the game.
+ *
+ * A loop is defined as a method that is called every frame, meanwhile an event is caused by an external input like a
+ * window being resized or closed.
+ *
+ * Note that ILoop should be inherited only by high authority objects, meaning that can only be contained by the Game
+ * class and can't be destroyed. Low authority objects should use the ILowLoop interface instead.
  */
-class Component
+class ILoop
 {
   public:
-    explicit Component(std::weak_ptr<class Element> parent) : _parent(std::move(parent))
-    {
-    }
-
-    // Virtual methods
-
     /**
      * @brief Main loop method.
      *
-     * loop() is called every frame for all Components connected to an Element that it's currently active.
-     * Implementations of loop() are expected to perform modifications on the parent Element, or other Component objects
-     * but are not limited to this and can perform modifications on other Element objects and their Component objects.
+     * loop() is called every frame for all active ILoops meaning that are directly or indirectly under the active room.
+     * Implementations of loop() are expected to perform modifications on itself or other objects.
      */
     virtual void loop() = 0;
     /**
      * @brief Secondary loop method. For visual effects only.
      *
      * renderLoop() is called every frame after the loop() method and it's expected to not perform any modifications
-     * on any Element object. Implementations of this method should only perform modifications on visual aspects using
-     * the modifications introduced by loop() as a guide.
+     * on any object other than itself. Implementations of this method should only perform updates on visual
+     * aspects using the modifications introduced by loop() as a guide.
      */
     virtual void renderLoop(){};
     /**
@@ -120,9 +138,37 @@ class Component
      * This method is meant for visual's corrections based on window resizing.
      */
     virtual void windowResizeEvent(){};
+};
+
+/**
+ * @brief Low authority ILoop object.
+ * ILowLoops is an interface for objects that require the loop and event methods and are of low authority, meaning that
+ * can be contained by things other than the Game class and can be destroyed.
+ */
+class ILowLoop : public IDestroy, public ILoop
+{
+};
+
+/**
+ * Verifies if a Component implementation has a constructor that takes as it's only parameter an Element.
+ * @tparam T Class that inherits from Component.
+ */
+template <class T>
+concept valid_component =
+    std::is_base_of<Component, T>::value && requires(std::weak_ptr<Element> element) { T{element}; };
+
+/**
+ * @brief Abstract class for the implementation of special Element functionalities.
+ */
+class Component : public ILowLoop
+{
+  public:
+    explicit Component(std::weak_ptr<class LocalCoords> parent) : _parent(std::move(parent))
+    {
+    }
 
   protected:
-    std::weak_ptr<Element> _parent; ///< Element that contains the Component and controls it's destruction.
+    std::weak_ptr<LocalCoords> _parent; ///< Element that contains the Component and controls it's destruction.
 };
 
 /**
@@ -133,16 +179,10 @@ class Component
  * What's really important about Element objects is their capability to hold Component objects to clearly
  * differentiate between Element instances.
  */
-class Element : public mate::LocalCoords
+class Element : public mate::LocalCoords, public ILowLoop
 {
   private:
-    // Shared pointer is used since other components might need to hold a reference, yet this should
-    // be the only shared pointer to this particular components and elements, all others should be weak pointers
-    // Todo: Find a way to use unique_ptr and references maybe.
-    //  Element->FindComponent->modify template? Only if find isn't costly and can't be confused (It CAN be confused).
-    std::vector<std::shared_ptr<Component>> _components;
-    std::list<std::shared_ptr<Element>> _elements;
-    bool _destroy_flag = false;
+    std::list<std::shared_ptr<ILowLoop>> _children;
 
   public:
     // Constructors
@@ -164,7 +204,8 @@ class Element : public mate::LocalCoords
     {
     }
 
-    explicit Element(const std::shared_ptr<LocalCoords> &parent, sf::Vector2f position, sf::Vector2f scale, float rotation)
+    explicit Element(const std::shared_ptr<LocalCoords> &parent, sf::Vector2f position, sf::Vector2f scale,
+                     float rotation)
         : LocalCoords(position, scale, rotation, parent)
     {
     }
@@ -175,10 +216,7 @@ class Element : public mate::LocalCoords
      */
     Element() = default;
 
-    [[maybe_unused]] unsigned long getElementsCount() const
-    {
-        return _elements.size();
-    }
+    [[maybe_unused]] unsigned long getElementsCount() const;
 
     // Adds a new Component of the template type to the component list and returns it
     /**
@@ -191,19 +229,8 @@ class Element : public mate::LocalCoords
     template <valid_component T> std::shared_ptr<T> addComponent() noexcept
     {
         auto new_component = std::make_shared<T>(std::dynamic_pointer_cast<Element>(shared_from_this()));
-        _components.emplace_back(new_component);
+        _children.emplace_back(new_component);
         return new_component;
-    }
-
-    /**
-     * When an Element is set for destruction the effect is not immediate, this is to avoid the destruction to occur
-     * while a code thread within the Element is being executed (Like a sef-destruction Component). shouldDestroy()
-     * allows to now if an Element is going to be destroy less than a frame before the event occurs.
-     * @return true if the Element is marked for destruction.
-     */
-    bool shouldDestroy() const
-    {
-        return _destroy_flag;
     }
 
     // Other methods definitions
@@ -218,32 +245,32 @@ class Element : public mate::LocalCoords
      * All children Element objects will also de marked for destruction. The removal itself can take up to a frame to
      * be effective, but the loop methods of the Component objects of an Element that's marked for removal are not
      * expected to be called. Furthermore, if an Element is marked for destruction by a Component of the same Element,
-     * the loop() method will not be called for the rest Component objects, so Component's with this capability are
+     * the loop() method will not be called for the remaining Component objects, so Component's with this capability
      * should be added as the first Component of an Element for efficiency. If an Element mark's it's parent for removal
      * all other children object's loop() method will be called yet those are expected to run Component and Element
      * purging only to avoid any possible unintended persistence.
      */
-    void destroy();
+    void destroy() override;
     /**
      * @brief Main Element loop method.
      *
-     * The loop() method fo the children Element and Component objects are called. The order is Component first
-     * Elements second, so if an Element mark's itself or one of it's children for destruction there will not be
-     * unnecessary loop() calls performed. If the element is marked for removal it will destroy all of it's child
-     * Element and Component objects.
+     * The loop() method of the children Elements and Component objects are called. The order is Components first
+     * Elements second, so if an Element mark's itself or one of it's children for destruction via a Component, there
+     * won't be unnecessary loop() calls performed. If the element is marked for removal it will destroy all of it's
+     * children Elements and Component objects.
      */
-    void loop();
+    void loop() override;
     /**
      * @brief Secondary loop method, meant for visual changes only.
      *
      * renderLoop() does not perform checks for an Element destruction, therefore Element destruction should only be
      * performed on the loop() methods.
      */
-    void renderLoop();
+    void renderLoop() override;
     /**
-     * @brief Communicates to all the children and Component that a window has changed in size.
+     * @brief Communicates to all the children and Components that a window has changed in size.
      */
-    void resizeEvent();
+    void windowResizeEvent() override;
     /**
      * @return All the related Element under it's authority (children + children's children + etc).
      */
@@ -257,11 +284,10 @@ class Element : public mate::LocalCoords
  * a TriggerShooter gets on top of them. Currently Trigger does not support for depth, but are expected to do so in the
  * near future.
  */
-class Trigger : public LocalCoords
+class Trigger : public LocalCoords, public IDestroy
 {
   private:
     const int id;
-    bool should_remove = false;
 
     static int generateId()
     {
@@ -287,15 +313,6 @@ class Trigger : public LocalCoords
     [[nodiscard]] int getID() const
     {
         return id;
-    }
-
-    [[nodiscard]] bool shouldRemove() const
-    {
-        return should_remove;
-    }
-    void markForRemoval()
-    {
-        should_remove = true;
     }
 
     /**
@@ -327,15 +344,15 @@ class TriggerManager
     /**
      * Removes all Triggers that are marked for removal.
      */
-    void curate()
+    void curateTriggers()
     {
-        triggers.remove_if([](const std::unique_ptr<Trigger> &trigger) { return trigger->shouldRemove(); });
+        triggers.remove_if([](const std::unique_ptr<Trigger> &trigger) { return trigger->shouldDestroy(); });
     }
 
     /**
      * Checks if the TriggerShooter is within any of the active Triggers.
      */
-    void checkTrigger(ShapeType shape, const TriggerShooter &shooter);
+    virtual void checkTrigger(ShapeType shape, const TriggerShooter &shooter);
     static bool rectangleToRectangleCheck(sf::Vector2f rect1_pos, sf::Vector2f rect1_dim, sf::Vector2f rect2_pos,
                                           sf::Vector2f rect2_dim);
     static bool circleToCircleCheck(sf::Vector2f circ1_pos, float circ1_rad, sf::Vector2f circ2_pos, float circ2_rad);
@@ -343,10 +360,16 @@ class TriggerManager
                                        sf::Vector2f rect_dim);
 
 #ifdef GDM_TESTING_ENABLED
-    uint getListCount(){ return triggers.size(); }
-    bool triggerIsContained(int trigger_id){
-        for (auto& trigger : triggers){
-            if(trigger->getID() == trigger_id){
+    uint getListCount()
+    {
+        return triggers.size();
+    }
+    bool triggerIsContained(int trigger_id)
+    {
+        for (auto &trigger : triggers)
+        {
+            if (trigger->getID() == trigger_id)
+            {
                 return true;
             }
         }
@@ -363,21 +386,29 @@ class TriggerManager
  * different levels, scenes or menu windows, so the Game object can switch between this by simply selecting a different
  * Room that already contains all the data of the Elements involved.
  */
-class Room : public mate::LocalCoords
+class Room : public mate::LocalCoords, public TriggerManager, public ILoop
 {
   private:
-    std::list<std::shared_ptr<Element>> _elements; ///< Elements within the Room.
-    TriggerManager _triggers;
+    std::list<std::shared_ptr<ILowLoop>> _children_loops; ///< Elements within the Room.
 
   public:
     // Constructors
     Room() = default;
 
-    // Element stuff
-    [[maybe_unused]] unsigned long getElementsCount()
+#ifdef GDM_TESTING_ENABLED
+    template <class T> unsigned long getLoopTypeCount()
     {
-        return _elements.size();
+        ulong count = 0;
+        for (const auto &loop : _children_loops)
+        {
+            if (std::dynamic_pointer_cast<T>(loop))
+            {
+                count++;
+            }
+        }
+        return count;
     }
+#endif
     /**
      * @brief Adds a preexisting Element to the Room.
      *
@@ -392,26 +423,6 @@ class Room : public mate::LocalCoords
      */
     std::shared_ptr<Element> addElement();
 
-    void addTrigger(std::unique_ptr<Trigger> trigger)
-    {
-        _triggers.addTrigger(std::move(trigger));
-    }
-
-    void removeTrigger(int trigger_id)
-    {
-        _triggers.removeTrigger(trigger_id);
-    }
-
-    void checkTrigger(ShapeType shape, const TriggerShooter &shooter)
-    {
-        _triggers.checkTrigger(shape, shooter);
-    }
-
-    void curateTriggers()
-    {
-        _triggers.curate();
-    }
-
     // Loops
 
     /**
@@ -420,12 +431,12 @@ class Room : public mate::LocalCoords
      * After all the child Element objects have run their main loops, the Element list is purged to effectively
      * destroy any Element objects that are marked for removal.
      */
-    void dataLoop();
+    void loop() override;
 
     /**
      * @brief Communicates to all the contained Element objects to run their respective renderLoop method.
      */
-    void renderLoop();
+    void renderLoop() override;
 
     // Events
 
@@ -434,7 +445,7 @@ class Room : public mate::LocalCoords
      *
      * This means that an sf::RenderWindow has changed in size.
      */
-    void resizeEvent();
+    void windowResizeEvent() override;
 };
 
 /**
@@ -443,7 +454,7 @@ class Room : public mate::LocalCoords
  * Game contains all of the Room objects from the game, runs the loop() method of the active one, tracks the window(s)
  * and keeps the TriggerManager.
  */
-class Game
+class Game : public TriggerManager
 {
   private:
     std::list<std::shared_ptr<Room>> _rooms;
@@ -478,13 +489,16 @@ class Game
     }
 
 #ifdef GDM_TESTING_ENABLED
-    [[nodiscard]] sf::View getView(u_int id_) const{
-        if (id_==0)
+    [[nodiscard]] sf::View getView(u_int id_) const
+    {
+        if (id_ == 0)
         {
             return _main_render_target.target->getView();
         }
-        for(auto& target : _secondary_targets){
-            if(target.id == id_){
+        for (auto &target : _secondary_targets)
+        {
+            if (target.id == id_)
+            {
                 return target.target->getView();
             }
         }
@@ -530,16 +544,17 @@ class Game
     }
 
     // Trigger related stuff
-    void addTrigger(std::unique_ptr<Trigger> trigger)
+    void addRoomTrigger(std::unique_ptr<Trigger> trigger)
     {
         _active_room->addTrigger(std::move(trigger));
     }
-    void removeTrigger(int trigger_id)
+    void removeRoomTrigger(int trigger_id)
     {
         _active_room->removeTrigger(trigger_id);
     }
-    void checkTrigger(ShapeType shape, const TriggerShooter &shooter)
+    void checkTrigger(ShapeType shape, const TriggerShooter &shooter) override
     {
+        TriggerManager::checkTrigger(shape, shooter);
         _active_room->checkTrigger(shape, shooter);
     }
 

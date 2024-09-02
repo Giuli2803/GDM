@@ -9,16 +9,21 @@ namespace mate
 std::shared_ptr<Element> Element::addChild()
 {
     auto child = std::make_shared<Element>(shared_from_this(), getPosition());
-    _elements.push_back(child);
+    _children.push_back(child);
     return std::move(child);
 }
 
 void Element::destroy()
 {
     _destroy_flag = true;
-    for (auto &element : _elements)
+    for (auto &child : _children)
     {
-        element->destroy();
+        if(auto element = std::dynamic_pointer_cast<Element>(child)){
+            element->destroy();
+        } else
+        {
+            child->destroy();
+        }
     }
 }
 
@@ -26,60 +31,71 @@ void Element::loop()
 {
     if (!_destroy_flag)
     {
-        for (const auto &component : _components)
+        for (const auto &child : _children)
         {
+            child->loop();
             if (_destroy_flag)
                 break;
-            component->loop();
         }
-    }
-
-    for (auto &element : _elements)
-    {
-        element->loop();
     }
 
     if (_destroy_flag)
     {
-        _components.clear();
-        _elements.clear();
+        _children.clear();
     }
 
-    _elements.remove_if([](auto &element) { return element->shouldDestroy(); });
+    _children.remove_if([](auto &child) { return child->shouldDestroy(); });
 }
 
 void Element::renderLoop()
 {
-    for (auto &element : _elements)
+    for (auto &element : _children)
     {
         element->renderLoop();
     }
 
-    for (const auto &component : _components)
+    for (const auto &component : _children)
     {
         component->renderLoop();
     }
 }
 
-void Element::resizeEvent()
+void Element::windowResizeEvent()
 {
-    for (auto &element : _elements)
+    for (auto &element : _children)
     {
-        element->resizeEvent();
+        element->windowResizeEvent();
     }
 
-    for (const auto &component : _components)
+    for (const auto &component : _children)
     {
         component->windowResizeEvent();
     }
 }
 
+unsigned long Element::getElementsCount() const
+{
+    ulong count = 0;
+    for (const auto &child : _children)
+    {
+        if (std::dynamic_pointer_cast<Element>(child))
+        {
+            ++count;
+        }
+    }
+    return count;
+}
+
 unsigned long Element::getFullElementsCount()
 {
-    unsigned long count = _elements.size();
-    for (auto &element : _elements)
+    unsigned long count = 0;
+    for (const auto &child : _children)
     {
-        count += element->getFullElementsCount();
+        if (auto element = std::dynamic_pointer_cast<Element>(child))
+        {
+            ++count;
+            count += element->getFullElementsCount();
+        }
     }
     return count;
 }
