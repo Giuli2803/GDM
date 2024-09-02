@@ -75,7 +75,8 @@ struct render_target
     }
 };
 
-class IDestroy{
+class IDestroy
+{
   protected:
     bool _destroy_flag = false;
 
@@ -98,7 +99,8 @@ class IDestroy{
      * to inform the object and other objects of the intention of being destroyed, but the deletion itself should be
      * managed separately.
      */
-    virtual void destroy(){
+    virtual void destroy()
+    {
         _destroy_flag = true;
     }
 };
@@ -112,7 +114,8 @@ class IDestroy{
  * Note that ILoop should be inherited only by high authority objects, meaning that can only be contained by the Game
  * class and can't be destroyed. Low authority objects should use the ILowLoop interface instead.
  */
-class ILoop{
+class ILoop
+{
   public:
     /**
      * @brief Main loop method.
@@ -142,7 +145,8 @@ class ILoop{
  * ILowLoops is an interface for objects that require the loop and event methods and are of low authority, meaning that
  * can be contained by things other than the Game class and can be destroyed.
  */
-class ILowLoop : public IDestroy, public ILoop{
+class ILowLoop : public IDestroy, public ILoop
+{
 };
 
 /**
@@ -150,10 +154,8 @@ class ILowLoop : public IDestroy, public ILoop{
  * @tparam T Class that inherits from Component.
  */
 template <class T>
-concept valid_component = std::is_base_of<Component, T>::value && requires(std::weak_ptr<Element> element)
-{
-    T{element};
-};
+concept valid_component =
+    std::is_base_of<Component, T>::value && requires(std::weak_ptr<Element> element) { T{element}; };
 
 /**
  * @brief Abstract class for the implementation of special Element functionalities.
@@ -164,6 +166,7 @@ class Component : public ILowLoop
     explicit Component(std::weak_ptr<class LocalCoords> parent) : _parent(std::move(parent))
     {
     }
+
   protected:
     std::weak_ptr<LocalCoords> _parent; ///< Element that contains the Component and controls it's destruction.
 };
@@ -179,8 +182,7 @@ class Component : public ILowLoop
 class Element : public mate::LocalCoords, public ILowLoop
 {
   private:
-    std::list<std::shared_ptr<Component>> _components;
-    std::list<std::shared_ptr<Element>> _elements;
+    std::list<std::shared_ptr<ILowLoop>> _children;
     bool _destroy_flag = false;
 
   public:
@@ -203,7 +205,8 @@ class Element : public mate::LocalCoords, public ILowLoop
     {
     }
 
-    explicit Element(const std::shared_ptr<LocalCoords> &parent, sf::Vector2f position, sf::Vector2f scale, float rotation)
+    explicit Element(const std::shared_ptr<LocalCoords> &parent, sf::Vector2f position, sf::Vector2f scale,
+                     float rotation)
         : LocalCoords(position, scale, rotation, parent)
     {
     }
@@ -214,10 +217,7 @@ class Element : public mate::LocalCoords, public ILowLoop
      */
     Element() = default;
 
-    [[maybe_unused]] unsigned long getElementsCount() const
-    {
-        return _elements.size();
-    }
+    [[maybe_unused]] unsigned long getElementsCount() const;
 
     // Adds a new Component of the template type to the component list and returns it
     /**
@@ -230,7 +230,7 @@ class Element : public mate::LocalCoords, public ILowLoop
     template <valid_component T> std::shared_ptr<T> addComponent() noexcept
     {
         auto new_component = std::make_shared<T>(std::dynamic_pointer_cast<Element>(shared_from_this()));
-        _components.emplace_back(new_component);
+        _children.emplace_back(new_component);
         return new_component;
     }
 
@@ -253,13 +253,13 @@ class Element : public mate::LocalCoords, public ILowLoop
      */
     void destroy() override;
     /**
-    * @brief Main Element loop method.
-    *
-    * The loop() method of the children Elements and Component objects are called. The order is Components first
-    * Elements second, so if an Element mark's itself or one of it's children for destruction via a Component, there
-    * won't be unnecessary loop() calls performed. If the element is marked for removal it will destroy all of it's
-    * children Elements and Component objects.
-    */
+     * @brief Main Element loop method.
+     *
+     * The loop() method of the children Elements and Component objects are called. The order is Components first
+     * Elements second, so if an Element mark's itself or one of it's children for destruction via a Component, there
+     * won't be unnecessary loop() calls performed. If the element is marked for removal it will destroy all of it's
+     * children Elements and Component objects.
+     */
     void loop() override;
     /**
      * @brief Secondary loop method, meant for visual changes only.
@@ -361,10 +361,16 @@ class TriggerManager
                                        sf::Vector2f rect_dim);
 
 #ifdef GDM_TESTING_ENABLED
-    uint getListCount(){ return triggers.size(); }
-    bool triggerIsContained(int trigger_id){
-        for (auto& trigger : triggers){
-            if(trigger->getID() == trigger_id){
+    uint getListCount()
+    {
+        return triggers.size();
+    }
+    bool triggerIsContained(int trigger_id)
+    {
+        for (auto &trigger : triggers)
+        {
+            if (trigger->getID() == trigger_id)
+            {
                 return true;
             }
         }
@@ -394,8 +400,10 @@ class Room : public mate::LocalCoords, public TriggerManager, public ILoop
     template <class T> unsigned long getLoopTypeCount()
     {
         ulong count = 0;
-        for (const auto& loop : _children_loops){
-            if(std::dynamic_pointer_cast<T>(loop)){
+        for (const auto &loop : _children_loops)
+        {
+            if (std::dynamic_pointer_cast<T>(loop))
+            {
                 count++;
             }
         }
@@ -482,13 +490,16 @@ class Game : public TriggerManager
     }
 
 #ifdef GDM_TESTING_ENABLED
-    [[nodiscard]] sf::View getView(u_int id_) const{
-        if (id_==0)
+    [[nodiscard]] sf::View getView(u_int id_) const
+    {
+        if (id_ == 0)
         {
             return _main_render_target.target->getView();
         }
-        for(auto& target : _secondary_targets){
-            if(target.id == id_){
+        for (auto &target : _secondary_targets)
+        {
+            if (target.id == id_)
+            {
                 return target.target->getView();
             }
         }

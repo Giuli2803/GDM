@@ -93,13 +93,15 @@ class InputActions : public Component
     void loop() override;
 
 #ifdef GDM_TESTING_ENABLED
-    uint getActionsCount(){
+    uint getActionsCount()
+    {
         return _actions.size();
     }
 #endif
 };
 
-inline bool _isKeyPressedFunc(sf::Keyboard::Key key) {
+inline bool _isKeyPressedFunc(sf::Keyboard::Key key)
+{
     return sf::Keyboard::isKeyPressed(key);
 }
 
