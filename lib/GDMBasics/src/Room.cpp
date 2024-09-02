@@ -22,13 +22,11 @@ std::shared_ptr<Element> Room::addElement()
 
 void Room::loop()
 {
-
-    for (auto &element : _children_loops)
+    for (const auto &child : _children_loops)
     {
-        element->loop();
+        child->loop();
     }
-
-    _children_loops.remove_if([](auto &element) { return element->shouldDestroy(); });
+    _children_loops.remove_if([](auto &child) { return child->shouldDestroy(); });
 }
 
 void Room::renderLoop()

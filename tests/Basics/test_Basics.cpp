@@ -161,7 +161,7 @@ TEST(BasicsTest, ChildElementCreationAndDestruction)
     ASSERT_EQ(parent_element->getFullElementsCount(), 3);
 
     child_element->destroy();
-    game->runSingleFrame();
+    main_room->loop();
 
     ASSERT_EQ(parent_element->getElementsCount(), 1);
     ASSERT_EQ(parent_element->getFullElementsCount(), 1);
@@ -267,16 +267,4 @@ TEST(BasicsTest, WeakPointerIsUninitialized){
     EXPECT_EQ(mate::weakPtrIsUninitialized(room), false);
     EXPECT_EQ(mate::weakPtrIsUninitialized(element), false);
 }
-
-
-
-/*TEST(BasicsTest, ComponentCreation){
-    auto room = std::make_shared<mate::Room>();
-    mate::Element element(room);
-    auto sprite = element.addComponent<mate::Sprite>();
-
-    ASSERT_NE(element.getComponent<mate::Sprite>(), nullptr);
-    ASSERT_EQ(element.getComponent<mate::Camera>(), nullptr);
-    ASSERT_EQ(element.getComponent<mate::Sprite>(), sprite);
-}*/
 

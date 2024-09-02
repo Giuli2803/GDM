@@ -183,7 +183,6 @@ class Element : public mate::LocalCoords, public ILowLoop
 {
   private:
     std::list<std::shared_ptr<ILowLoop>> _children;
-    bool _destroy_flag = false;
 
   public:
     // Constructors

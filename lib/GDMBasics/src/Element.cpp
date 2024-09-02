@@ -16,9 +16,14 @@ std::shared_ptr<Element> Element::addChild()
 void Element::destroy()
 {
     _destroy_flag = true;
-    for (auto &element : _children)
+    for (auto &child : _children)
     {
-        element->destroy();
+        if(auto element = std::dynamic_pointer_cast<Element>(child)){
+            element->destroy();
+        } else
+        {
+            child->destroy();
+        }
     }
 }
 
