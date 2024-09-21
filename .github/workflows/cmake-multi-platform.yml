@@ -1,0 +1,29 @@
+name: Build GDMBasics with horusec
+
+on:
+  push:
+    branches:
+      - develop  
+  pull_request:
+    branches:
+      - develop
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up CMake and dependencies
+        run: |
+          sudo apt-get install cmake
+          sudo apt-get install libsfml-dev
+
+      - name: Build GDMBasics
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make
+      
