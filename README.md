@@ -17,3 +17,7 @@ cd build
 cmake ..
 make
 ```
+
+## EXTRA
+
+Se utiliza version de horusec 2.9 beta, ya que la 2.8 que es la recomendada en la pagina de horusec tirar error con  docker.
