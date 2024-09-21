@@ -1,12 +1,16 @@
-name: Build GDMBasics with horusec
+# This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
+name: Horusec Security and build
 
 on:
   push:
-    branches:
-      - develop  
+    branches: [ "main", "develop" ]
   pull_request:
-    branches:
-      - develop
+    branches: [ "main", "develop" ]
+
+env:
+  BUILD_TYPE: Release
+
 jobs:
   SAST_HORUSEC:
     runs-on: ubuntu-latest
@@ -21,6 +25,7 @@ jobs:
           horusec version
           horusec start -p="./" -e="true" --disable-docker 
           
+
   build:
     runs-on: ubuntu-latest
 
