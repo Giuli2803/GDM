@@ -43,3 +43,6 @@
 # Build
 /build
 */build
+
+# Temporary files
+horusec-report.json
