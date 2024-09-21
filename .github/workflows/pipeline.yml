@@ -20,6 +20,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Fix containerd conflict
+        run: |
+          sudo apt-get remove -y containerd containerd.io
+          sudo apt-get autoremove -y
+          sudo apt-get autoclean -y
+          sudo apt-get clean -y
+
+      - name: Set up Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+          sudo systemctl enable docker
+          sudo usermod -aG docker $USER
+          newgrp docker
+          docker --version  # Verifica que Docker esté instalado correctamente
+
       - name: Running Horusec Security
         run: |
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/main/deployments/scripts/install.sh | bash -s latest
