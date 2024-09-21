@@ -8,7 +8,7 @@ namespace mate
 {
 sf::Vector2f TriggerShooter::getPosition() const
 {
-    if (std::shared_ptr<Element> spt_parent = _parent.lock())
+    if (std::shared_ptr<LocalCoords> spt_parent = _parent.lock())
     {
         return offset.getPositionBounds(spt_parent->getWorldPosition());
     }
@@ -17,7 +17,7 @@ sf::Vector2f TriggerShooter::getPosition() const
 
 sf::Vector2f TriggerShooter::getDimensions() const
 {
-    if (std::shared_ptr<Element> spt_parent = _parent.lock())
+    if (std::shared_ptr<LocalCoords> spt_parent = _parent.lock())
     {
         return offset.getDimensionBounds(spt_parent->getWorldScale());
     }

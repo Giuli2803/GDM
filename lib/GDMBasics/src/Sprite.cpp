@@ -8,7 +8,7 @@ namespace mate
 Sprite::Sprite(const std::weak_ptr<Element> &parent) : Component(parent)
 {
     _sprite = std::make_shared<ord_sprite>();
-    _texture.loadFromFile("../Square.png");
+    //_texture.loadFromFile("../Square.png");
     _sprite->sprite.setTexture(_texture, true);
     auto spt_game = Game::getGame();
     _game_manager = spt_game;
@@ -35,11 +35,11 @@ void Sprite::loop()
 {
     if (_actualize)
     {
-        if (std::shared_ptr<Element> spt_parent = _parent.lock())
+        if (std::shared_ptr<LocalCoords> spt_parent = _parent.lock())
         {
-            _sprite->sprite.setScale(spt_parent->getWorldScale());
+            _sprite->sprite.setScale(offset.getDimensionBounds(spt_parent->getWorldScale()));
             _sprite->sprite.setRotation(spt_parent->getWorldRotation());
-            _sprite->sprite.setPosition(spt_parent->getWorldPosition());
+            _sprite->sprite.setPosition(offset.getPositionBounds(spt_parent->getWorldPosition()));
         }
     }
 }

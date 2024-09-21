@@ -33,8 +33,9 @@ namespace mate
     setRotation(rotation);
 }
 
-[[maybe_unused]] LocalCoords::LocalCoords(sf::Vector2f position, sf::Vector2f scale, const std::shared_ptr<LocalCoords> &parent)
-    :_parent(parent)
+[[maybe_unused]] LocalCoords::LocalCoords(sf::Vector2f position, sf::Vector2f scale,
+                                          const std::shared_ptr<LocalCoords> &parent)
+    : _parent(parent)
 {
     setPosition(position);
     setScale(scale);

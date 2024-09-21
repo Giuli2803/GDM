@@ -131,8 +131,7 @@ class LocalCoords : public sf::Transformable, public std::enable_shared_from_thi
     /**
      * @deprecated depth is now a public variable.
      */
-     [[deprecated]]
-    int getDepth() const
+    [[deprecated]] int getDepth() const
     {
         return depth;
     }
@@ -142,8 +141,7 @@ class LocalCoords : public sf::Transformable, public std::enable_shared_from_thi
     /**
      * @deprecated depth is now a public variable.
      */
-     [[deprecated]]
-    void setDepth(int depth_)
+    [[deprecated]] void setDepth(int depth_)
     {
         depth = depth_;
     }

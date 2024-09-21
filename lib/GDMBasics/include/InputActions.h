@@ -91,7 +91,22 @@ class InputActions : public Component
      * if the instance has expired, in which case the action will be deleted.
      */
     void loop() override;
+
+#ifdef GDM_TESTING_ENABLED
+    uint getActionsCount()
+    {
+        return _actions.size();
+    }
+#endif
 };
+
+inline bool _isKeyPressedFunc(sf::Keyboard::Key key)
+{
+    return sf::Keyboard::isKeyPressed(key);
+}
+
+inline std::function<bool(sf::Keyboard::Key)> isKeyPressed = &_isKeyPressedFunc;
+
 } // namespace mate
 
 #endif // GDMATE_INPUTACTIONS_H

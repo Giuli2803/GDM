@@ -20,7 +20,7 @@ void InputActions::loop()
             }
         }
 
-        if (sf::Keyboard::isKeyPressed(it->key))
+        if (isKeyPressed(it->key))
         {
             it->action();
         }

@@ -15,6 +15,16 @@ game_instance start()
     auto my_element = main_room->addElement();
 
     // ADD YOUR CODE HERE ------------------------------------------------
+    /*
+     * How to add another room to the game:
+     *
+     * auto second_room game->addRoom();
+     *
+     * How to switch between rooms:
+     *
+     * game->switchRoom(1); // To second_room
+     * game->switchRoom(0); // To main_room
+     */
 
     /* How to add an Element into a room:
      * auto my_element = main_room->addElement();

@@ -25,20 +25,18 @@ Camera::~Camera()
 
 float Camera::getRatio()
 {
-    if (_scale_type == REVEAL)
-    {
-        auto size = _view.getSize();
-        _aspect_ratio = size.x / size.y;
-    }
+    auto size = _view.getSize();
+    _aspect_ratio = size.x / size.y;
     return _aspect_ratio;
 }
 
-void Camera::useNewTarget()
+unsigned int Camera::useNewTarget(const std::string &title)
 {
     if (auto _spt_game = _game_manager.lock())
     {
-        target_id = _spt_game->addSecondaryTarget(_view);
+        target_id = _spt_game->addSecondaryTarget(_view, title);
     }
+    return target_id;
 }
 
 void Camera::renderLoop()
@@ -49,16 +47,11 @@ void Camera::renderLoop()
         return;
     }
 
-    if (std::shared_ptr<Element> spt_parent = _parent.lock())
+    if (std::shared_ptr<LocalCoords> spt_parent = _parent.lock())
     {
         _view.setCenter(spt_parent->getWorldPosition());
         _view.setRotation(spt_parent->getWorldRotation());
     }
-
-    if (target_id == 0)
-        _spt_game->setWindowView(_view);
-    else
-        _spt_game->setWindowView(_view, target_id);
 
     _visible_sprites.remove_if([](const std::weak_ptr<const Sprite> &sprite) { return sprite.expired(); });
 
@@ -67,13 +60,15 @@ void Camera::renderLoop()
         auto spt_b = b.lock();
         int depth_a = spt_a->getElementDepth();
         int depth_b = spt_b->getElementDepth();
-        return (depth_a < depth_b || (depth_a == depth_b && spt_a->getSprite() < spt_b->getSprite()));
+        return (depth_a < depth_b || (depth_a == depth_b && spt_a->getSprite()->depth < spt_b->getSprite()->depth));
     });
 
     for (const auto &sprite : _visible_sprites)
     {
         _spt_game->draw(sprite.lock()->getSprite(), target_id);
     }
+
+    _spt_game->setWindowView(_view, target_id);
 }
 
 void Camera::windowResizeEvent()
@@ -88,11 +83,11 @@ void Camera::windowResizeEvent()
     case RESCALE:
         break;
     case REVEAL:
-        _view.setSize((float)_spt_game->getWindowSize().x, (float)_spt_game->getWindowSize().y);
+        _view.setSize((float)_spt_game->getWindowSize(target_id).x, (float)_spt_game->getWindowSize(target_id).y);
         break;
     case LETTERBOX:
-        float m_window_width = (float)_spt_game->getWindowSize().x;
-        float m_window_height = (float)_spt_game->getWindowSize().y;
+        float m_window_width = (float)_spt_game->getWindowSize(target_id).x;
+        float m_window_height = (float)_spt_game->getWindowSize(target_id).y;
         float new_width = _aspect_ratio * m_window_height;
         float new_height = m_window_width / _aspect_ratio;
         float offset_width = (m_window_width - new_width) / 2.0f;
