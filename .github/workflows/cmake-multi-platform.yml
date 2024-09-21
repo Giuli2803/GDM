@@ -8,6 +8,19 @@ on:
     branches:
       - develop
 jobs:
+  SAST_HORUSEC:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Running Horusec Security
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/main/deployments/scripts/install.sh | bash -s latest
+          horusec version
+          horusec start -p="./" -e="true" --disable-docker 
+          
   build:
     runs-on: ubuntu-latest
 
