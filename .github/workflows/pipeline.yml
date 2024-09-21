@@ -13,6 +13,7 @@ env:
 
 jobs:
   SAST_HORUSEC:
+    name: horusec-security
     runs-on: ubuntu-latest
 
     steps:
