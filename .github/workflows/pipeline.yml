@@ -23,7 +23,7 @@ jobs:
         run: |
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/main/deployments/scripts/install.sh | bash -s latest
           horusec version
-          horusec start -p="./" -e="true" --disable-docker 
+          horusec start -p="./" -e="true"
           
 
   build:
