@@ -10,7 +10,7 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  SAST_HORUSEC:
+  SAST_HORUSEC_PRE_BUILD:
     name: horusec-security
     runs-on: ubuntu-latest
 
@@ -18,7 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         
-      - name: Running Horusec Security
+      - name: Running Horusec Security pre build
         run: |
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest-beta
           horusec start -p="./"
@@ -43,3 +43,15 @@ jobs:
           cmake ..
           make
       
+  SAST_HORUSEC_POST_BUILD:
+    name: horusec-security
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Running Horusec Security post build
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest-beta
+          horusec start -p="./"   
