@@ -46,3 +46,5 @@
 
 # Temporary files
 horusec-report.json
+horusec.log
+horusec-output.txt

@@ -21,7 +21,16 @@ jobs:
       - name: Running Horusec Security pre build
         run: |
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest-beta
-          horusec start -p="./"
+          horusec start -p="./" --output-format="text" --json-output-file="./horusec-output.txt"
+      
+      - name: Check for medium vulnerabilities
+        run: |
+          medium_count=$(grep -c "Severity: MEDIUM" ./horusec-output.txt)
+          echo "Found $medium_count medium severity vulnerabilities"
+          if [ "$medium_count" -gt 2 ]; then
+            echo "Too many medium vulnerabilities found! Failing the build."
+            exit 1
+          fi
   
       - name: Set up CMake and dependencies
         run: |
@@ -34,7 +43,3 @@ jobs:
           cd build
           cmake ..
           make
-      - name: Running Horusec Security post build
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest-beta
-          horusec start -p="./"   
