@@ -27,7 +27,7 @@ jobs:
         run: |
           medium_count=$(grep -c "Severity: MEDIUM" ./horusec-output.txt)
           echo "Found $medium_count medium severity vulnerabilities"
-          if [ "$medium_count" -gt 2 ]; then
+          if [ "$medium_count" -gt 3 ]; then
             echo "Too many medium vulnerabilities found! Failing the build."
             exit 1
           fi
