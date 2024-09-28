@@ -11,7 +11,7 @@ env:
 
 jobs:
   SAST_HORUSEC_PRE_BUILD:
-    name: horusec-security
+    name: horusec-security-pre-build
     runs-on: ubuntu-latest
 
     steps:
@@ -44,7 +44,7 @@ jobs:
           make
       
   SAST_HORUSEC_POST_BUILD:
-    name: horusec-security
+    name: horusec-security-post-build
     runs-on: ubuntu-latest
 
     steps:
