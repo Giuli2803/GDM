@@ -11,7 +11,7 @@ env:
 
 jobs:
 
-  build:
+  Horusec_Security_and_build:
     runs-on: ubuntu-latest
 
     steps:
