@@ -43,3 +43,8 @@ jobs:
           cd build
           cmake ..
           make
+      
+      - name: Running Horusec Security post build
+        run: |
+            curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest-beta
+            horusec start -p="./" --output-format="text" --json-output-file="./horusec-output.txt"
